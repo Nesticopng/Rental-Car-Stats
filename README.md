@@ -8,7 +8,7 @@ Esta es una aplicación en Streamlit para visualizar estadísticas de renta de a
 2. Instala las dependencias:
    ```bash
    pip install -r requirements.txt
-   streamlit run src/app.py
+   python -m streamlit run src/app.py
 
 ---
 
