@@ -1,5 +1,4 @@
 import streamlit as st
-import plotly.express as px
 from src.utils.helpers import cargar_datos
 
 #Data frame
@@ -22,13 +21,6 @@ frecuencia_mayor_empresa = conteo_source.iloc[0]
 
 #Total Registros en el Dataframe
 total_registros = df.shape[0]
-
-#Configuraciones Gráfica Vehiculos según su Class
-reds = [
-    '#2A0000', '#450A0A', '#5F1A1A', '#7A2A2A', '#8B0000', '#A52A2A', '#B71C1C', 
-    '#C62828', '#D32F2F', '#D84315', '#E53935', '#EF5350', '#F44336', '#E57373', 
-    '#EF9A9A', '#FF6F61', '#FF8A80', '#FFAB91', '#FFCDD2', '#FFEBEE'
-]
 
 def indicadores_dashboard():
     with st.container():
@@ -53,8 +45,3 @@ def indicadores_dashboard():
             st.subheader("Empresa con más Rentas", divider="gray")
             st.title(f"**{empresa_mayor_frecuencia}**")
             st.write(f"La empresa que más rentas ha concretado es: **{empresa_mayor_frecuencia}** con **{frecuencia_mayor_empresa} rentas**.")
-
-    fig = px.bar(df, x='Class', color='Class', 
-                 color_discrete_sequence=reds, 
-                 title='Tipos de Vehículos mas rentados según su clase.')
-    st.plotly_chart(fig)
