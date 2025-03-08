@@ -32,8 +32,6 @@ def inicio():
 
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 
-    st.write("Mapa?")
-
     st.write("Variables Númericas")
 
     tasa_pregago()

@@ -37,7 +37,7 @@ def tasa_pregago():
             values="Count", 
             title="Distribución de Prepagos en Reservas",
             color="Pre_Deposito",
-            color_discrete_map={"Hizo Pre-Depósito": "blue", "No hizo Pre-Depósito": "red"}
+            color_discrete_map={"Hizo Pre-Depósito": "blue", "No hizo Pre-Depósito": "#8B0000"}
         )
         st.plotly_chart(fig)
 
