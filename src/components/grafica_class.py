@@ -46,11 +46,16 @@ def generar_grafico(df, columna, titulo, eje_x, metrica):
         y_axis = "Cantidad"
         text_col = "Cantidad"
         y_label = "Vehículos Rentados"
-    else:
+    elif metrica == "Gasto Promedio ($USD)":
         df["Gasto Promedio ($USD)"] = df["Promedio"].apply(lambda x: f"${x:,.2f}")
         y_axis = "Promedio"
         text_col = "Gasto Promedio ($USD)"
         y_label = "Gasto Promedio ($USD)"
+    else:
+        df["Promedio de Días Rentados"] = df["Promedio"].apply(lambda x: f"{x:.2f} días")
+        y_axis = "Promedio"
+        text_col = "Promedio de Días Rentados"
+        y_label = "Promedio de Días Rentados"
     
     fig = px.bar(
         df, x=columna, y=y_axis, color=columna,
@@ -70,10 +75,16 @@ def mostrar_analisis(data, columna, nombre, metrica):
     st.write(f"**Análisis de {nombre}:**")
 
     for _, row in top.iterrows():
-        valor = f"{row["Cantidad"]} vehículos rentados" if metrica == "Vehículos Rentados" else f"${row["Promedio"]:,.2f} en promedio"
+        if metrica == "Vehículos Rentados":
+            valor = f"{row['Cantidad']} vehículos rentados"
+        elif metrica == "Gasto Promedio ($USD)":
+            valor = f"${row['Promedio']:,.2f} en promedio"
+        else:
+            valor = f"{row['Promedio']:.2f} días en promedio"
+        
         st.write(f"- **{row[columna]}**: {valor}")
 
-    if metrica == "Gasto Promedio ($USD)":
+    if metrica in ["Gasto Promedio ($USD)", "Promedio de Días Rentados"]:
         data_analisis_renombrada = data_analisis_renombrada.drop(columns=["Promedio"])
 
     st.write(data_analisis_renombrada)
@@ -92,7 +103,7 @@ def grafica_vehiculos():
     with col2:
         datos_config = st.selectbox("Mostrar datos decodificados", ("Sí", "No"), disabled=(grafica_config_es == "Clasificación"))
     with col3:
-        metrica = st.selectbox("Métrica a analizar", ("Vehículos Rentados", "Gasto Promedio ($USD)"))
+        metrica = st.selectbox("Métrica a analizar", ("Vehículos Rentados", "Gasto Promedio ($USD)", "Promedio de Días Rentados"))
     
     grafica_config = column_mapping[grafica_config_es]
 
@@ -101,12 +112,15 @@ def grafica_vehiculos():
     if metrica == "Vehículos Rentados":
         datos_analisis = df[grafica_config].value_counts().reset_index()
         datos_analisis.columns = [grafica_config, "Cantidad"]
-    else:
+    elif metrica == "Gasto Promedio ($USD)":
         variable_seleccionada = st.selectbox("Variable de gasto", gasto_mapping.keys())
         variable_seleccionada = gasto_mapping[variable_seleccionada]
         datos_analisis = df.groupby(grafica_config)[variable_seleccionada].mean().round(2).reset_index()
         datos_analisis.columns = [grafica_config, "Promedio"]
         variable_seleccionada_es = gasto_mapping_es[variable_seleccionada]
+    else:
+        datos_analisis = df.groupby(grafica_config)["RDays"].mean().round(2).reset_index()
+        datos_analisis.columns = [grafica_config, "Promedio"]
     
     # Título Dinámico
     titulo = (f"Análisis de {metrica} de {variable_seleccionada_es} según {grafica_config_es} "
