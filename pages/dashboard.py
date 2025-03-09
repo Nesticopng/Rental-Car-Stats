@@ -1,12 +1,11 @@
 import streamlit as st
 from src.utils.helpers import cargar_datos
 from src.components.indicadores_dashboard import indicadores_dashboard
-from src.components.grafica_class import grafica_class
+from src.components.grafica_class import grafica_vehiculos
 from src.components.grafica_source import grafica_source
 from src.components.grafica_tiempo import grafica_tiempo
 from src.components.grafica_loc import grafica_loc
 from src.components.estado_registros import estado_registros
-from components.grafica_gasto_promedio import grafica_gasto_promedio
 from src.components.tasa_prepago import tasa_pregago
 
 df = cargar_datos()
@@ -18,7 +17,7 @@ def inicio():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    grafica_class()
+    grafica_vehiculos()
 
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 
@@ -35,10 +34,6 @@ def inicio():
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 
     estado_registros()
-
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
-
-    grafica_gasto_promedio()
 
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 

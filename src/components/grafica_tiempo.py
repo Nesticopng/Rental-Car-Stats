@@ -28,37 +28,44 @@ def mostrar_analisis(fecha_columna, titulo):
         st.write(periodo_estudio)
 
         # Analizar por año
-        frecuencia_anual = fecha_columna.dt.year.value_counts().sort_index()
+        frecuencia_anual = fecha_columna.dt.year.value_counts().reset_index()
+        frecuencia_anual.columns = ["Año", "Cantidad de Vehículos Rentados"]
+
         if len(frecuencia_anual) > 1:
             st.write("Años con más transacciones:")
-            # Mostrar los años con más transacciones (ordenados por la cantidad de transacciones)
-            st.write(frecuencia_anual.sort_values(ascending=False).head())
+            st.write(frecuencia_anual.sort_values(by="Cantidad de Vehículos Rentados", ascending=False).head())
         else:
             st.write(f"Solo se tiene datos para el año **{min_fecha.year}**.")
 
-        # Analizar por mes (por cada año)
+
+        # Analizar por mes
         st.write("Meses con más transacciones por año:")
         meses_espanol = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
         
-        for year in frecuencia_anual.index:
-            mes_por_anio = fecha_columna[fecha_columna.dt.year == year].dt.month.value_counts().sort_index()
-            if len(mes_por_anio) > 1:
+        for year in frecuencia_anual["Año"]:
+            mes_por_año = fecha_columna[fecha_columna.dt.year == year].dt.month.value_counts().reset_index()
+            mes_por_año.columns = ["Mes", "Cantidad de Vehículos Rentados"]
+            mes_por_año["Mes"] = mes_por_año["Mes"].apply(lambda x: meses_espanol[x - 1])
+            
+            if len(mes_por_año) > 1:
                 st.write(f"Año **{year}**:")
-                # Mostrar los meses con más transacciones (ordenados por la cantidad de transacciones)
-                st.write(mes_por_anio.sort_values(ascending=False).head())
+                st.write(mes_por_año.sort_values(by="Cantidad de Vehículos Rentados", ascending=False).head())
             else:
                 st.write(f"Solo se tiene datos para el año **{year}**.")
 
+
         # Analizar por día (por cada mes de cada año)
         st.write("Días con más transacciones por mes y año:")
-        for year in frecuencia_anual.index:
+        for year in frecuencia_anual["Año"]:
             for month in range(1, 13):
-                dia_por_mes = fecha_columna[(fecha_columna.dt.year == year) & (fecha_columna.dt.month == month)].dt.day.value_counts().sort_index()
+                dia_por_mes = fecha_columna[(fecha_columna.dt.year == year) & (fecha_columna.dt.month == month)].dt.day.value_counts().reset_index()
+                dia_por_mes.columns = ["Día", "Cantidad de Vehículos Rentados"]
+                
                 if not dia_por_mes.empty:
                     st.write(f"Año **{year}**, Mes **{meses_espanol[month-1]}**:")
-                    # Mostrar los días con más transacciones (ordenados por la cantidad de transacciones)
-                    st.write(dia_por_mes.sort_values(ascending=False).head())
+                    st.write(dia_por_mes.sort_values(by="Cantidad de Vehículos Rentados", ascending=False).head())
 
+# Configuraciones del Calendario
 def mostrar_calendario(fecha_columna, titulo):
     st.header(f"{titulo}")
 
@@ -91,9 +98,6 @@ def mostrar_calendario(fecha_columna, titulo):
 
     st.pyplot(fig)
 
-    # Llamar a la función de análisis
-    mostrar_analisis(fecha_columna, titulo)
-
 # Generar Gráfica
 def grafica_tiempo():
     st.header("📆 Calendario de Transacciones")
@@ -104,10 +108,12 @@ def grafica_tiempo():
         ["Fecha de Renta del Vehículo", "Fecha de Vuelta del Vehículo", "Fecha de Reserva"]
     )
 
-    # Mapeo del tipo seleccionado a los datos reales
     if tipo_fecha == "Fecha de Renta del Vehículo":
         mostrar_calendario(df["PickUpDate"], "Calendario de Rentas")
+        mostrar_analisis(df["PickUpDate"], "Rentas de Vehículos")
     elif tipo_fecha == "Fecha de Vuelta del Vehículo":
         mostrar_calendario(df["ReturnDate"], "Calendario de Devoluciones")
+        mostrar_analisis(df["ReturnDate"], "Devoluciones de Vehículos")
     elif tipo_fecha == "Fecha de Reserva":
         mostrar_calendario(df["BookedDate"], "Calendario de Reservas")
+        mostrar_analisis(df["BookedDate"], "Reservas de Vehículos")

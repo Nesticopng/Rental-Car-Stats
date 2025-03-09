@@ -10,12 +10,12 @@ df["Pre_Deposito"] = df["res_prepagos"].apply(lambda x: "Hizo Pre-Depósito" if 
 
 # Contar la frecuencia de cada categoría
 frecuencia_prepagos = df["Pre_Deposito"].value_counts().reset_index()
-frecuencia_prepagos.columns = ["Pre_Deposito", "Count"]
+frecuencia_prepagos.columns = ["Pre_Deposito", "Cantidad"]
 
 # Obtener totales
-total_registros = frecuencia_prepagos["Count"].sum()
-hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "Hizo Pre-Depósito"]["Count"].sum()
-no_hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "No hizo Pre-Depósito"]["Count"].sum()
+total_registros = frecuencia_prepagos["Cantidad"].sum()
+hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "Hizo Pre-Depósito"]["Cantidad"].sum()
+no_hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "No hizo Pre-Depósito"]["Cantidad"].sum()
 
 # Calcular porcentajes
 porcentaje_hizo_pre = (hizo_pre / total_registros) * 100 if total_registros > 0 else 0
@@ -24,9 +24,9 @@ porcentaje_no_hizo_pre = (no_hizo_pre / total_registros) * 100 if total_registro
 # Calcular el promedio de dinero gastado en pre-depósitos
 promedio_predeposito = df[df["res_prepagos"] > 0]["res_prepagos"].mean()
 
-# Crear el gráfico pie
+# Generar el gráfico pie
 def tasa_pregago():
-    st.header("Tasa de Prepagos")
+    st.header("Tasa de Porcentual de los Pre-Depósitos")
 
     col1, col2 = st.columns([2, 1])
 
@@ -34,10 +34,10 @@ def tasa_pregago():
         fig = px.pie(
             frecuencia_prepagos, 
             names="Pre_Deposito", 
-            values="Count", 
+            values="Cantidad", 
             title="Distribución de Prepagos en Reservas",
             color="Pre_Deposito",
-            color_discrete_map={"Hizo Pre-Depósito": "blue", "No hizo Pre-Depósito": "#8B0000"}
+            color_discrete_map={"Hizo Pre-Depósito": "green", "No hizo Pre-Depósito": "#8B0000"}
         )
         st.plotly_chart(fig)
 
@@ -59,11 +59,11 @@ def tasa_pregago():
                 st.markdown("### 📌 Total de Registros")
                 st.header(f"**{total_registros:,} Registros**")
 
-    with st.expander("Análisis detallado de Pre-Depósitos"):
+    with st.expander("Análisis detallado de los Pre-Depósitos"):
         if hizo_pre == total_registros:
             st.write("🔴 **El 100% de los clientes realizaron un predepósito.** No hay registros sin prepago.")
         elif no_hizo_pre == total_registros:
-            st.write("🔵 **El 100% de los clientes NO realizaron un predepósito.** No hay registros con prepago.")
+            st.write("🟢 **El 100% de los clientes NO realizaron un predepósito.** No hay registros con prepago.")
         else:
             st.write(f"🔴 **{hizo_pre} clientes ({porcentaje_hizo_pre:.2f}%) hicieron un predepósito.**")
-            st.write(f"🔵 **{no_hizo_pre} clientes ({porcentaje_no_hizo_pre:.2f}%) no hicieron un predepósito.**")
+            st.write(f"🟢 **{no_hizo_pre} clientes ({porcentaje_no_hizo_pre:.2f}%) no hicieron un predepósito.**")

@@ -7,10 +7,10 @@ df = cargar_datos()
 
 # Traducir los valores de la columna Status_
 status_translation = {
-    "UNKNOW": "Desconocido",
-    "SHOW": "Asistió",
-    "NO SHOW": "No Asistió",
-    "CANCELED": "Cancelado"
+    "UNKNOW": "Desconocidos",
+    "SHOW": "Asistieron",
+    "NO SHOW": "No Asistieron",
+    "CANCELED": "Cancelados"
 }
 
 df["Status_Traducido"] = df["Status_"].map(status_translation)
@@ -46,7 +46,9 @@ def estado_registros():
                 "Cancelado": "orange"
             }
         )
+        
         fig.update_traces(texttemplate='%{text}', textposition='outside')
+
         st.plotly_chart(fig)
 
     with col2:
@@ -56,6 +58,6 @@ def estado_registros():
             st.markdown("### 📌 Total de Registros")
             st.header(f"**{total_registros:,} Registros**")
 
-    with st.expander("Análisis detallado de Estados"):
+    with st.expander("Análisis detallado de los Estados de los Registros"):
         for _, row in frecuencia_status.iterrows():
-            st.write(f"⚫ **{row['Estado']}: {row['Cantidad']} registros ({row['Porcentaje']:.2f}%)**")
+            st.write(f"⚫ **{row['Cantidad']} registros {row['Estado']} ({row['Porcentaje']:.2f}%)**")
