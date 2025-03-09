@@ -27,9 +27,9 @@ def generar_grafico(df, columna, titulo, eje_x):
     fig = px.bar(
         df,
         x=columna, 
-        y='Count', color=columna,
+        y='Cantidad', color=columna,
         color_discrete_sequence=rojo(),
-        title=titulo, text='Count')
+        title=titulo, text='Cantidad')
     
     fig.update_layout(
         xaxis_title=eje_x,
@@ -39,10 +39,10 @@ def generar_grafico(df, columna, titulo, eje_x):
     st.plotly_chart(fig)
 
 def mostrar_analisis(data, columna, nombre):
-    top = data.nlargest(5, 'Count')
+    top = data.nlargest(5, 'Cantidad')
     st.write(f"**Análisis de {nombre}:**")
     for _, row in top.iterrows():
-        st.write(f"- **{row[columna]}**: {row['Count']} vehículos rentados")
+        st.write(f"- **{row[columna]}**: {row['Cantidad']} vehículos rentados")
     st.write(f"**Tabla de datos:**")
     st.write(top)
 
@@ -70,7 +70,7 @@ def grafica_class():
 
     df = decodificar_datos(df, decodificacion, datos_config)
     frecuencia = df[grafica_config].value_counts().reset_index()
-    frecuencia.columns = [grafica_config, 'Count']
+    frecuencia.columns = [grafica_config, 'Cantidad']
     
     generar_grafico(frecuencia, grafica_config, f'Vehículos mas rentados según su {grafica_config_es}', grafica_config_es)
     

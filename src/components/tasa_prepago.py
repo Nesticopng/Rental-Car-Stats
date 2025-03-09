@@ -42,21 +42,22 @@ def tasa_pregago():
         st.plotly_chart(fig)
 
     with col2:
-        st.markdown("### 📊 Datos Adicionales")
+        with st.container(border=True):
+            st.markdown("### 📊 Datos Adicionales")
 
-        st.divider()
+            st.divider()
 
-        with st.container():
-            if hizo_pre > 0:
-                st.markdown("### 💰 Promedio de los Pre-Depósitos")
-                st.header(f"**${promedio_predeposito:,.2f}**")
-            else:
-                st.write("⚠️ No hay registros con pre-depósito.")
+            with st.container():
+                if hizo_pre > 0:
+                    st.markdown("### 💲 Promedio de los Pre-Depósitos")
+                    st.header(f"**${promedio_predeposito:,.2f}**")
+                else:
+                    st.write("⚠️ No hay registros con pre-depósito.")
 
-            st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
 
-            st.markdown("### 📌 Total de Registros")
-            st.header(f"**{total_registros:,} Registros**")
+                st.markdown("### 📌 Total de Registros")
+                st.header(f"**{total_registros:,} Registros**")
 
     with st.expander("Análisis detallado de Pre-Depósitos"):
         if hizo_pre == total_registros:
