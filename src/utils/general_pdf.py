@@ -503,8 +503,15 @@ pdf.set_font('Arial', '', 12)
 pdf.multi_cell(0, 8, txt="     Diseñar y desarrollar una aplicación para la gestión integral de la empresa ACO Rent Car, que permita el control, seguimiento y optimización de las estrategias operativas y comerciales.  ", align="J")
 pdf.ln(8)
 
+pdf.image("./assets/images/cuadro1.png", x=24, y=85, w=180)
+
+pdf.add_page()
+
+pdf.image("./assets/images/cuadro2.png", x=24, y=26, w=180)
+
 # pdf.multi_cell(100, 20, txt="adfshg", border=1, align="J")
 
+# Referencias Bibliograficas
 pdf.add_page()
 pdf.set_font('Arial', 'B', 12)
 
