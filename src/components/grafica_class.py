@@ -70,24 +70,34 @@ def generar_grafico(df, columna, titulo, eje_x, metrica):
 # Análisis Automatizado
 def mostrar_analisis(data, columna, nombre, metrica):
     top = data.nlargest(5, "Cantidad" if metrica == "Vehículos Rentados" else "Promedio")
-    data_analisis_renombrada = top.rename(columns={columna: f"{nombre}"})
+    data_tabla = data.rename(columns={columna: f"{nombre}"})
 
-    st.write(f"**Análisis de {nombre}:**")
+    if metrica == "Vehículos Rentados":
+        st.write(f"### Los Vehículos más rentados según su {nombre} son:")
 
-    for _, row in top.iterrows():
+    elif metrica == "Gasto Promedio ($USD)":
+        st.write(f"### Los Vehículos que más gastan en promedio según su {metrica} son:")
+
+    else:
+        st.write(f"### Vehículos que más días alquilan en promedio según su {metrica}:")
+
+    for i, row in top.iterrows():
         if metrica == "Vehículos Rentados":
             valor = f"{row['Cantidad']} vehículos rentados"
+
         elif metrica == "Gasto Promedio ($USD)":
             valor = f"${row['Promedio']:,.2f} en promedio"
+
         else:
             valor = f"{row['Promedio']:.2f} días en promedio"
         
         st.write(f"- **{row[columna]}**: {valor}")
 
     if metrica in ["Gasto Promedio ($USD)", "Promedio de Días Rentados"]:
-        data_analisis_renombrada = data_analisis_renombrada.drop(columns=["Promedio"])
+        data_tabla = data_tabla.drop(columns=["Promedio"])
 
-    st.write(data_analisis_renombrada)
+    st.write("### Tabla de Datos")
+    st.write(data_tabla)
 
 def grafica_vehiculos():
     st.header("Análisis de Vehículos Rentados")
@@ -99,11 +109,23 @@ def grafica_vehiculos():
     # Filtros
     col1, col2, col3 = st.columns(3)
     with col1:
-        grafica_config_es = st.selectbox("Variable a analizar", column_mapping.keys())
+        grafica_config_es = st.selectbox(
+            "Variable a analizar",
+            column_mapping.keys()
+        )
+
     with col2:
-        datos_config = st.selectbox("Mostrar datos decodificados", ("Sí", "No"), disabled=(grafica_config_es == "Clasificación"))
+        datos_config = st.selectbox(
+            "Mostrar datos decodificados", 
+            ("Sí", "No"),
+            disabled=(grafica_config_es == "Clasificación")
+        )
+
     with col3:
-        metrica = st.selectbox("Métrica a analizar", ("Vehículos Rentados", "Gasto Promedio ($USD)", "Promedio de Días Rentados"))
+        metrica = st.selectbox(
+            "Métrica a analizar", 
+            ("Vehículos Rentados", "Gasto Promedio ($USD)", "Promedio de Días Rentados")
+        )
     
     grafica_config = column_mapping[grafica_config_es]
 
@@ -112,12 +134,14 @@ def grafica_vehiculos():
     if metrica == "Vehículos Rentados":
         datos_analisis = df[grafica_config].value_counts().reset_index()
         datos_analisis.columns = [grafica_config, "Cantidad"]
+
     elif metrica == "Gasto Promedio ($USD)":
         variable_seleccionada = st.selectbox("Variable de gasto", gasto_mapping.keys())
         variable_seleccionada = gasto_mapping[variable_seleccionada]
         datos_analisis = df.groupby(grafica_config)[variable_seleccionada].mean().round(2).reset_index()
         datos_analisis.columns = [grafica_config, "Promedio"]
         variable_seleccionada_es = gasto_mapping_es[variable_seleccionada]
+        
     else:
         datos_analisis = df.groupby(grafica_config)["RDays"].mean().round(2).reset_index()
         datos_analisis.columns = [grafica_config, "Promedio"]
@@ -130,5 +154,5 @@ def grafica_vehiculos():
     # Generar Gráfico y Análisis
     generar_grafico(datos_analisis, grafica_config, titulo, grafica_config_es, metrica)
     
-    with st.expander("Detalles y Análisis"):
+    with st.expander("Análisis Detallado"):
         mostrar_analisis(datos_analisis, grafica_config, grafica_config_es, metrica)

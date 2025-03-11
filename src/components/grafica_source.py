@@ -22,40 +22,50 @@ frecuencia_source.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
 def mostrar_datos_y_analisis(data, columna, es_dinero, es_promedio, variable_nombre):
     top_5 = data.nlargest(5, "Cantidad de Vehículos Rentados")
 
-    if not top_5.empty:
-        mas_frecuente = top_5.iloc[0]
-        if es_dinero:
-            valor = f"${mas_frecuente['Cantidad de Vehículos Rentados']:,.2f}"
-        elif es_promedio:
-            valor = f"{mas_frecuente['Cantidad de Vehículos Rentados']:.2f} días"
-        else:
-            valor = mas_frecuente["Cantidad de Vehículos Rentados"]
+    mas_frecuente = top_5.iloc[0]
+    if es_dinero:
+        valor = f"${mas_frecuente['Cantidad de Vehículos Rentados']:,.2f}"
 
-        descripcion = "dinero recaudado" if es_dinero else "días rentados en promedio" if es_promedio else "rentas"
-        st.write(f"La empresa con más {descripcion} por **{variable_nombre}** es **{mas_frecuente[columna]}**, con un total de **{valor}**.")
-
-        if len(top_5) > 1:
-            st.write("Otras empresas destacadas son:")
-            for i, row in top_5.iloc[1:].iterrows():
-                if es_dinero:
-                    valor = f"${row['Cantidad de Vehículos Rentados']:,.2f}"
-                elif es_promedio:
-                    valor = f"{row['Cantidad de Vehículos Rentados']:.2f} días"
-                else:
-                    valor = row["Cantidad de Vehículos Rentados"]
-                st.write(f"- **{row[columna]}**: {valor}.")
+    elif es_promedio:
+        valor = f"{mas_frecuente['Cantidad de Vehículos Rentados']:.2f} días"
 
     else:
-        st.write("No hay datos suficientes para realizar un análisis.")
+        valor = mas_frecuente["Cantidad de Vehículos Rentados"]
+
+    if es_dinero:
+        st.write(f"### La empresa con más dinero recaudado por **{variable_nombre}** es **{mas_frecuente[columna]}**, con un total de **{valor}**.")
     
+    elif es_promedio:
+        st.write(f"### La empresa con más días rentados en promedio por **{variable_nombre}** es **{mas_frecuente[columna]}**, con un total de **{valor}**.")
+
+    else:
+        st.write(f"### La empresa que más rentas ha generado es **{mas_frecuente[columna]}**, con un total de **{valor}** rentas.")
+
+    if len(top_5) > 1:
+        st.write("Otras empresas destacadas son:")
+        
+        for i, row in top_5.iloc[1:].iterrows():
+            if es_dinero:
+                valor = f"${row['Cantidad de Vehículos Rentados']:,.2f}"
+
+            elif es_promedio:
+                valor = f"{row['Cantidad de Vehículos Rentados']:.2f} días"
+
+            else:
+                valor = row["Cantidad de Vehículos Rentados"]
+            st.write(f"- **{row[columna]}**: {valor}.")
+
     if es_dinero:
         columnas_a_mostrar = ["Empresa", "Dinero Recaudado ($USD)"]
+
     elif es_promedio:
         columnas_a_mostrar = ["Empresa", "Promedio de Días Rentados"]
+
     else:
         columnas_a_mostrar = ["Empresa", "Cantidad de Vehículos Rentados"]
 
-    st.write(top_5[columnas_a_mostrar])
+    st.write("### Tabla de Datos")
+    st.write(data[columnas_a_mostrar])
 
 # Generar Gráfico
 def grafica_source():
@@ -70,6 +80,7 @@ def grafica_source():
         data = frecuencia_source
         es_dinero = False
         es_promedio = False
+
     elif variable_seleccionada == "Promedio de Días Rentados":
         columna_real = variable_mapping[variable_seleccionada]
         data = df.groupby("Source")[columna_real].mean().reset_index()
@@ -78,6 +89,7 @@ def grafica_source():
         data["Promedio de Días Rentados"] = data["Cantidad de Vehículos Rentados"].apply(lambda x: f"{x:.2f} días")
         es_dinero = False
         es_promedio = True
+
     else:
         columna_real = variable_mapping[variable_seleccionada]
         data = df.groupby("Source")[columna_real].sum().reset_index()
@@ -109,5 +121,5 @@ def grafica_source():
         
     st.plotly_chart(fig)
     
-    with st.expander("Análisis detallado de Empresas"):
+    with st.expander("Análisis detallado"):
         mostrar_datos_y_analisis(data, "Empresa", es_dinero, es_promedio, variable_seleccionada)

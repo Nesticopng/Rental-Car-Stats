@@ -60,4 +60,4 @@ def estado_registros():
 
     with st.expander("Análisis detallado de los Estados de los Registros"):
         for _, row in frecuencia_status.iterrows():
-            st.write(f"⚫ **{row['Cantidad']} registros {row['Estado']} ({row['Porcentaje']:.2f}%)**")
+            st.write(f"- **{row['Cantidad']} registros {row['Estado']} ({row['Porcentaje']:.2f}%)**")

@@ -34,6 +34,7 @@ def mostrar_analisis(fecha_columna, titulo):
         if len(frecuencia_anual) > 1:
             st.write("Años con más transacciones:")
             st.write(frecuencia_anual.sort_values(by="Cantidad de Vehículos Rentados", ascending=False).head())
+            
         else:
             st.write(f"Solo se tiene datos para el año **{min_fecha.year}**.")
 
@@ -50,6 +51,7 @@ def mostrar_analisis(fecha_columna, titulo):
             if len(mes_por_año) > 1:
                 st.write(f"Año **{year}**:")
                 st.write(mes_por_año.sort_values(by="Cantidad de Vehículos Rentados", ascending=False).head())
+
             else:
                 st.write(f"Solo se tiene datos para el año **{year}**.")
 
@@ -102,7 +104,6 @@ def mostrar_calendario(fecha_columna, titulo):
 def grafica_tiempo():
     st.header("📆 Calendario de Transacciones")
 
-    # Selección de tipo de fecha
     tipo_fecha = st.selectbox(
         "Selecciona el tipo de transacción a visualizar:",
         ["Fecha de Renta del Vehículo", "Fecha de Vuelta del Vehículo", "Fecha de Reserva"]
@@ -111,9 +112,11 @@ def grafica_tiempo():
     if tipo_fecha == "Fecha de Renta del Vehículo":
         mostrar_calendario(df["PickUpDate"], "Calendario de Rentas")
         mostrar_analisis(df["PickUpDate"], "Rentas de Vehículos")
+
     elif tipo_fecha == "Fecha de Vuelta del Vehículo":
         mostrar_calendario(df["ReturnDate"], "Calendario de Devoluciones")
         mostrar_analisis(df["ReturnDate"], "Devoluciones de Vehículos")
+
     elif tipo_fecha == "Fecha de Reserva":
         mostrar_calendario(df["BookedDate"], "Calendario de Reservas")
         mostrar_analisis(df["BookedDate"], "Reservas de Vehículos")
