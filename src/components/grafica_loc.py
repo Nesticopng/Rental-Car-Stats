@@ -38,7 +38,7 @@ def grafica_loc():
     with col2:
         config_loc_in_out = st.selectbox(
             "Selecciona el tipo de ubicación",
-            ("Sitio de Entrada", "Sitio de Salida"),
+            ("Sitio de Renta", "Sitio de Retorno"),
         )
 
     with col3:
@@ -56,14 +56,14 @@ def grafica_loc():
 
     # Definir la columna de ubicación según las selecciones
     if datos_config_decode == "IATA":
-        columna_analisis = "LocIn" if config_loc_in_out == "Sitio de Entrada" else "LocOut"
+        columna_analisis = "LocIn" if config_loc_in_out == "Sitio de Renta" else "LocOut"
         label_locacion = "Ubicación (IATA)"
     else:
         if grafica_loc == "Ciudad":
-            columna_analisis = "LocInCity" if config_loc_in_out == "Sitio de Entrada" else "LocOutCity"
+            columna_analisis = "LocInCity" if config_loc_in_out == "Sitio de Renta" else "LocOutCity"
             label_locacion = "Ciudad"
         else:
-            columna_analisis = "LocInCountry" if config_loc_in_out == "Sitio de Entrada" else "LocOutCountry"
+            columna_analisis = "LocInCountry" if config_loc_in_out == "Sitio de Renta" else "LocOutCountry"
             label_locacion = "País"
 
     # Calcular métrica seleccionada

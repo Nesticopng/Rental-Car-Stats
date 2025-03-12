@@ -1,13 +1,16 @@
+import streamlit as st
 import pandas as pd
 import os
 from pyairports.airports import Airports
 
-def cargar_datos():
+
+def cargar_datos_sin_filtros():
+    
     # Cargar el archivo
     df = pd.read_excel(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "BD.xlsx")))
-
     columnas = df.columns.tolist()
 
+    # Cargar decodificador (IATA)
     airports = Airports()
 
     # Crear nuevas columnas basadas en 'Class'
@@ -15,6 +18,11 @@ def cargar_datos():
     df["Type"] = df["Class"].astype(str).str[1]
     df["Transmission"] = df["Class"].astype(str).str[2]
     df["Fuel"] = df["Class"].astype(str).str[3]
+
+    # Cambiar el formato de las columnas basadas en fecha para quitar las horas.
+    df["Pickupd"] = pd.to_datetime(df["Pickupd"]).dt.date
+    df["Returnd"] = pd.to_datetime(df["Returnd"]).dt.date
+    df["Booked"] = pd.to_datetime(df["Booked"]).dt.date
 
     # Función para obtener ciudad y país a partir de un código IATA
     def obtener_ciudad_pais(codigo_iata):
@@ -63,5 +71,20 @@ def cargar_datos():
 
     # Aplica el nuevo orden
     df = df[columnas_reordenadas]
+                
+    return df
+
+def cargar_datos():
+        # Aplicar Filtros si existen
+    df = cargar_datos_sin_filtros()
+
+    if "filters" in st.session_state:
+        filters = st.session_state["filters"]
+
+        for key, value in filters.items():
+            if isinstance(value, list) and value:  # Filtrar listas con valores seleccionados
+                df = df[df[key.replace("_", "")].isin(value)]
+            elif isinstance(value, tuple):  # Rango de valores (min, max)
+                df = df[(df[key.replace("_", "")] >= value[0]) & (df[key.replace("_", "")] <= value[1])]
 
     return df

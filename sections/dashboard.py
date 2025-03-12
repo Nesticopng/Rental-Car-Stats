@@ -1,5 +1,6 @@
 import streamlit as st
 from src.utils.helpers import cargar_datos
+from src.utils.filtros import configuraciones
 from src.components.indicadores_dashboard import indicadores_dashboard
 from src.components.grafica_class import grafica_vehiculos
 from src.components.grafica_source import grafica_source
@@ -42,4 +43,5 @@ def inicio():
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 
     st.header("Base de Datos")
+    configuraciones()
     st.dataframe(df)

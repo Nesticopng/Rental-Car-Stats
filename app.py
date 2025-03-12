@@ -1,8 +1,8 @@
 import streamlit as st
-from pages.dashboard import inicio
-from pages.cargar_archivo import cargar_archivo
-from pages.pdf import PDF
-from pages.documentacion import documentacion
+from sections.dashboard import inicio
+from sections.cargar_archivo import cargar_archivo
+from sections.pdf import PDF
+from sections.documentacion import documentacion
 from src.components.sidebar import mostrar_sidebar
 
 # Configuración de la página

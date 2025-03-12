@@ -40,10 +40,10 @@ def estado_registros():
             title="Distribución de Estados de Reservación",
             color="Estado",
             color_discrete_map={
-                "Desconocido": "gray",
-                "Asistió": "green",
-                "No Asistió": "red",
-                "Cancelado": "orange"
+                "Desconocidos": "gray",
+                "Asistieron": "green",
+                "No Asistieron": "red",
+                "Cancelados": "orange"
             }
         )
         
