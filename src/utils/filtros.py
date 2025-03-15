@@ -1,84 +1,84 @@
 import streamlit as st
-from src.utils.helpers import cargar_datos_sin_filtros
+from src.utils.helpers import cargar_datos_sin_filtros, cargar_datos
 
 def configuraciones():
     with st.popover("Configuraciones de la Base de Datos", icon="⚙️", use_container_width=True):
+    
         st.title("Configuraciónes")
         
         df = cargar_datos_sin_filtros()
+
         if "filters" not in st.session_state:
             st.session_state["filters"] = {}
-
+        temp_filters = st.session_state["filters"].copy()
+        
         st.markdown("<br>", unsafe_allow_html=True)
 
         # 🏙️ Filtros de Locaciones
         st.subheader("Filtros de Locaciones")
-
         col1, col2 = st.columns(2)
         
         with col1:
-            locin_ciudad = st.multiselect("Ciudad de Renta (LocIn)", df["LocInCity"].dropna().unique(), placeholder="Seleccione una o varias ciudades")
-            locin_pais = st.multiselect("País de Renta (LocIn)", df["LocInCountry"].dropna().unique(), placeholder="Seleccione uno o varios países")
-
+            temp_filters["LocInCity"] = st.multiselect("Ciudad de Renta (LocIn)", df["LocInCity"].dropna().unique(), default=st.session_state["filters"].get("LocInCity", []), placeholder="Seleccione ciudades")
+            temp_filters["LocInCountry"] = st.multiselect("País de Renta (LocIn)", df["LocInCountry"].dropna().unique(), default=st.session_state["filters"].get("LocInCountry", []), placeholder="Seleccione países")
+        
         with col2:
-            locout_ciudad = st.multiselect("Ciudad de Retorno (LocOut)", df["LocOutCity"].dropna().unique(), placeholder="Seleccione una o varias ciudades")
-            locout_pais = st.multiselect("País de Retorno (LocOut)", df["LocOutCountry"].dropna().unique(), placeholder="Seleccione uno o varios países")
-
+            temp_filters["LocOutCity"] = st.multiselect("Ciudad de Retorno (LocOut)", df["LocOutCity"].dropna().unique(), default=st.session_state["filters"].get("LocOutCity", []), placeholder="Seleccione ciudades")
+            temp_filters["LocOutCountry"] = st.multiselect("País de Retorno (LocOut)", df["LocOutCountry"].dropna().unique(), default=st.session_state["filters"].get("LocOutCountry", []), placeholder="Seleccione países")
+        
         st.markdown("<br>", unsafe_allow_html=True)
-
+        
         # 🚗 Filtros de Clasificación de Vehículos
-        st.subheader("Filtros de Clasificación de Vehículos (Class)")
-        class_filtro = st.multiselect("Clasificación (Class)", df["Class"].dropna().unique(), placeholder="Seleccione una o varios tipos de Vehículos")
-
+        st.subheader("Filtros de Clasificación de Vehículos")
+        temp_filters["Class"] = st.multiselect("Clasificación", df["Class"].dropna().unique(), default=st.session_state["filters"].get("Class", []), placeholder="Seleccione clasificaciones")
+        
         st.markdown("<br>", unsafe_allow_html=True)
-
+        
         # 🏢 Filtro de Empresas
         st.subheader("Filtro de Empresas")
-        empresa = st.multiselect("Empresas", df["Source"].dropna().unique(), placeholder="Seleccione una o varias empresas")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            codigo_tarifa = st.multiselect("Código de Tarifa", df["RateCode"].dropna().unique(), placeholder="Seleccione uno o varios códigos")
+        temp_filters["Source"] = st.multiselect("Empresas", df["Source"].dropna().unique(), default=st.session_state["filters"].get("Source", []), placeholder="Seleccione empresas")
         
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            temp_filters["RateCode"] = st.multiselect("Código de Tarifa", df["RateCode"].dropna().unique(), default=st.session_state["filters"].get("RateCode", []), placeholder="Seleccione códigos")
+    
         with col2:
-            status = st.multiselect("Estatus del Registro", df["Status_"].dropna().unique(), placeholder="Seleccione uno o varios estados")
-
+            temp_filters["Status_"] = st.multiselect("Estatus del Registro", df["Status_"].dropna().unique(), default=st.session_state["filters"].get("Status_", []), placeholder="Seleccione estatus")
+        
         st.markdown("<br>", unsafe_allow_html=True)
-
+        
         # 🔢 Filtros de Rango Numérico
-        col1, col2 = st.columns(2, gap="medium")
+        col1, col2 = st.columns(2)
+        
         with col1:
-            rdays_min, rdays_max = st.slider("Rango de Días Rentados (Días)", int(df["RDays"].min()), int(df["RDays"].max()), (int(df["RDays"].min()), int(df["RDays"].max())))
+            temp_filters["RDays"] = st.slider("Días Rentados", int(df["RDays"].min()), int(df["RDays"].max()), value=st.session_state["filters"].get("RDays", (int(df["RDays"].min()), int(df["RDays"].max()))))        
         
         with col2:
-            totalbill_min, totalbill_max = st.slider("Rango de Dinero Gastado por Vehículo ($USD)", float(df["TotalBill"].min()), float(df["TotalBill"].max()), (float(df["TotalBill"].min()), float(df["TotalBill"].max())))
-
+            temp_filters["TotalBill"] = st.slider("Dinero Gastado ($USD)", float(df["TotalBill"].min()), float(df["TotalBill"].max()), value=st.session_state["filters"].get("TotalBill", (float(df["TotalBill"].min()), float(df["TotalBill"].max()))))
+        
         st.markdown("<br>", unsafe_allow_html=True)
-
-        # 📅 Filtros de Fecha (Pickupd y Returnd)
+        
+        # 📅 Filtros de Fecha
         col1, col2 = st.columns(2)
+        
         with col1:
-            pickup_date = st.date_input("Fecha de Renta (Rango)", [])
-            pickup_date_range = tuple(pickup_date) if len(pickup_date) == 2 else None
-
+            temp_filters["Pickupd"] = st.date_input("Periodo de Renta", value=st.session_state["filters"].get("Pickupd", []))
+        
         with col2:
-            return_date = st.date_input("Fecha de Retorno (Rango)", [])
-            return_date_range = tuple(return_date) if len(return_date) == 2 else None
-
-        if st.button("Aplicar Filtros"):
-            st.session_state["filters"] = {
-                "LocInCity": locin_ciudad,
-                "LocOutCity": locout_ciudad,
-                "LocInCountry": locin_pais,
-                "LocOutCountry": locout_pais,
-                "Class": class_filtro,
-                "Source": empresa,
-                "RateCode": codigo_tarifa,
-                "Status_": status,
-                "RDays": (rdays_min, rdays_max),
-                "TotalBill": (totalbill_min, totalbill_max),
-                "Pickupd": pickup_date_range,
-                "Returnd": return_date_range,
-            }
-            st.rerun()
+            temp_filters["Returnd"] = st.date_input("Periodo de Retorno", value=st.session_state["filters"].get("Returnd", []))
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Botones de Acción
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("Guardar Cambios", use_container_width=True, type="primary"):
+                st.session_state["filters"] = temp_filters.copy()
+                st.rerun()
+        
+        with col2:
+            if st.button("Limpiar Filtros", use_container_width=True):
+                st.session_state["filters"] = {}
+                st.rerun()
