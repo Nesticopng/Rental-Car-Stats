@@ -6,7 +6,7 @@ def mostrar_sidebar():
     logotipo = "assets/images/logo.png"
     st.logo(logotipo, icon_image=isotipo)
 
-    menu = ["Inicio", "Cargar Archivo", "PDF", "Documentación"]
+    menu = ["Inicio", "Cargar Archivo", "PDF", "Chat IA", "Documentación"]
     if "selected_page" not in st.session_state:
         st.session_state.selected_page = "Inicio"
         

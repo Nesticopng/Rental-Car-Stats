@@ -86,5 +86,5 @@ def cargar_datos():
                 df = df[df[key.replace("_", "")].isin(value)]
             elif isinstance(value, tuple) and len(value) == 2:  # Rango de valores (min, max)
                 df = df[(df[key.replace("_", "")] >= value[0]) & (df[key.replace("_", "")] <= value[1])]
-
+    st.rerun()
     return df

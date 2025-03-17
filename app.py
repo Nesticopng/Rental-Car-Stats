@@ -4,6 +4,7 @@ from sections.cargar_archivo import cargar_archivo
 from sections.pdf import PDF
 from sections.documentacion import documentacion
 from src.components.sidebar import mostrar_sidebar
+from src.components.openai import ChatGPT
 
 # Configuración de la página
 st.set_page_config(
@@ -22,5 +23,7 @@ if st.session_state.selected_page == "Cargar Archivo":
     cargar_archivo()
 if st.session_state.selected_page == "PDF":
     PDF()
+if st.session_state.selected_page == "Chat IA":
+    ChatGPT()
 if st.session_state.selected_page == "Documentación":
     documentacion()
