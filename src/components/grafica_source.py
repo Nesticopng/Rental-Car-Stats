@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import numpy as np
 from src.utils.helpers import cargar_datos
 from src.utils.paleta_rojo import rojo
 
@@ -9,9 +10,9 @@ df = cargar_datos()
 # Mapeo de nombres de variables
 variable_mapping = {
     "Cantidad de Rentas": "Cantidad",
-    "Tarifa Básica": "TotalRate",
-    "Extras Gastados": "TotalExtras",
-    "Tarifa Total": "TotalBill",
+    "Dinero Recaudado por Tarifa Básica": "TotalRate",
+    "Dinero Recaudado por Extras Gastados": "TotalExtras",
+    "Dinero Recaudado por Tarifa Total": "TotalBill",
     "Promedio de Días Rentados": "RDays"
 }
 
@@ -19,41 +20,61 @@ variable_mapping = {
 frecuencia_source = df["Source"].value_counts().reset_index()
 frecuencia_source.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
 
-def mostrar_datos_y_analisis(data, columna, es_dinero, es_promedio, variable_nombre):
-    top_5 = data.nlargest(5, "Cantidad de Vehículos Rentados")
+# Análisis Automatizado
+def mostrar_datos_y_analisis(data, es_dinero, es_promedio, metrica):
+    st.write("### Análisis Estadístico")
+    analisis = []
 
-    mas_frecuente = top_5.iloc[0]
-    if es_dinero:
-        valor = f"${mas_frecuente['Cantidad de Vehículos Rentados']:,.2f}"
+    # Calcular estadísticas clave
+    total_registros = len(data)
+    media = data.iloc[:, 1].mean()
+    mediana = data.iloc[:, 1].median()
+    desviacion = data.iloc[:, 1].std()
+    max_valor = data.iloc[:, 1].max()
+    min_valor = data.iloc[:, 1].min()
+    top_empresa = data.iloc[0, 0]
+    top_valor = data.iloc[0, 1]
 
-    elif es_promedio:
-        valor = f"{mas_frecuente['Cantidad de Vehículos Rentados']:.2f} días"
+    # Calcular percentiles
+    percentil_90 = np.percentile(data.iloc[:, 1], 90)
+    percentil_10 = np.percentile(data.iloc[:, 1], 10)
 
+    # Análisis General
+    analisis.append(f"📊 **Total de Empresas Analizadas:** {total_registros:,}")
+    analisis.append(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+    analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
+    analisis.append(f"📉 **Desviación estándar:** {desviacion:,.2f}")
+    analisis.append(f"🔝 **Empresa con mayor {metrica}:** {top_empresa} con {top_valor:,.2f}")
+    analisis.append(f"🔽 **Menor {metrica} en el registro:** {min_valor:,.2f}")
+    analisis.append(f"🏆 **Mayor {metrica} en el registro:** {max_valor:,.2f}")
+
+    # Análisis de dispersión
+    if desviacion > media * 0.5:
+        analisis.append(f"⚠️ **Alta variabilidad:** Existen grandes diferencias entre empresas en esta métrica de {metrica}.")
     else:
-        valor = mas_frecuente["Cantidad de Vehículos Rentados"]
+        analisis.append("✅ **Distribución estable:** No hay grandes diferencias extremas en la métrica analizada.")
 
-    if es_dinero:
-        st.write(f"### La empresa con más dinero recaudado por **{variable_nombre}** es **{mas_frecuente[columna]}**, con un total de **{valor}**.")
-    
-    elif es_promedio:
-        st.write(f"### La empresa con más días rentados en promedio por **{variable_nombre}** es **{mas_frecuente[columna]}**, con un total de **{valor}**.")
+    # Análisis de concentración
+    if max_valor > percentil_90 * 1.5:
+        analisis.append(f"🚀 **El valor máximo ({max_valor:,.2f}) es significativamente superior al percentil 90.** Esto sugiere que una o pocas empresas dominan la métrica.")
+    elif max_valor < percentil_90:
+        analisis.append("📊 **El valor máximo no es muy superior al percentil 90.** Esto indica una distribución más uniforme.")
 
-    else:
-        st.write(f"### La empresa que más rentas ha generado es **{mas_frecuente[columna]}**, con un total de **{valor}** rentas.")
+    if min_valor < percentil_10:
+        analisis.append(f"🔻 **Existen empresas con valores por debajo del percentil 10.** Es recomendable evaluar si requieren optimización.")
 
-    if len(top_5) > 1:
-        st.write("Otras empresas destacadas son:")
-        
-        for i, row in top_5.iloc[1:].iterrows():
-            if es_dinero:
-                valor = f"${row['Cantidad de Vehículos Rentados']:,.2f}"
+    # Recomendaciones estratégicas
+    if media > 1000 and es_dinero:
+        analisis.append("💰 **Los ingresos promedio son altos.** Se puede considerar estrategias para mantener esta tendencia positiva.")
+    elif media < 500 and es_dinero:
+        analisis.append("📉 **Ingresos promedio bajos.** Evaluar promociones o mejoras en estrategias de captación.")
 
-            elif es_promedio:
-                valor = f"{row['Cantidad de Vehículos Rentados']:.2f} días"
+    if top_valor > media * 2:
+        analisis.append(f"🏆 **{top_empresa} es líder en {metrica}.** Se podría analizar su situación y estrategias para replicar en otras empresas.")
 
-            else:
-                valor = row["Cantidad de Vehículos Rentados"]
-            st.write(f"- **{row[columna]}**: {valor}.")
+    # Mostrar el análisis línea por línea
+    for linea in analisis:
+        st.write(linea)
 
     if es_dinero:
         columnas_a_mostrar = ["Empresa", "Dinero Recaudado ($USD)"]
@@ -71,18 +92,18 @@ def mostrar_datos_y_analisis(data, columna, es_dinero, es_promedio, variable_nom
 def grafica_source():
     st.header("Análisis de Rentas y Recaudación por Empresa")
     
-    variable_seleccionada = st.selectbox(
+    metrica = st.selectbox(
         "Métrica a analizar",
-        ("Cantidad de Rentas", "Tarifa Básica", "Extras Gastados", "Tarifa Total", "Promedio de Días Rentados")
+        ("Cantidad de Rentas", "Dinero Recaudado por Tarifa Básica", "Dinero Recaudado por Extras Gastados", "Dinero Recaudado por Tarifa Total", "Promedio de Días Rentados")
     )
 
-    if variable_seleccionada == "Cantidad de Rentas":
+    if metrica == "Cantidad de Rentas":
         data = frecuencia_source
         es_dinero = False
         es_promedio = False
 
-    elif variable_seleccionada == "Promedio de Días Rentados":
-        columna_real = variable_mapping[variable_seleccionada]
+    elif metrica == "Promedio de Días Rentados":
+        columna_real = variable_mapping[metrica]
         data = df.groupby("Source")[columna_real].mean().reset_index()
         data.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
         data["Cantidad de Vehículos Rentados"] = data["Cantidad de Vehículos Rentados"].round(2)
@@ -91,7 +112,7 @@ def grafica_source():
         es_promedio = True
 
     else:
-        columna_real = variable_mapping[variable_seleccionada]
+        columna_real = variable_mapping[metrica]
         data = df.groupby("Source")[columna_real].sum().reset_index()
         data.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
         data["Cantidad de Vehículos Rentados"] = data["Cantidad de Vehículos Rentados"].round(2)
@@ -101,7 +122,7 @@ def grafica_source():
         
     titulo = (
         f"Promedio de Días Rentados según la Empresa" if es_promedio else
-        f"Dinero recaudado por {variable_seleccionada} según la Empresa" if es_dinero else
+        f"{metrica} según la Empresa" if es_dinero else
         "Rentas generadas según la Empresa"
     )
 
@@ -121,5 +142,5 @@ def grafica_source():
         
     st.plotly_chart(fig)
     
-    with st.expander("Análisis detallado"):
-        mostrar_datos_y_analisis(data, "Empresa", es_dinero, es_promedio, variable_seleccionada)
+    with st.expander("Análisis Detallado"):
+        mostrar_datos_y_analisis(data, es_dinero, es_promedio, metrica)

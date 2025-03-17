@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import numpy as np
 from src.utils.helpers import cargar_datos
 from src.utils.paleta_rojo import rojo
 
@@ -8,15 +9,65 @@ df = cargar_datos()
 
 # Análisis Automatizado
 def generar_analisis(data, metrica):
-    top_5 = data.nlargest(5, "Valor") if metrica == "Dinero Generado (USD)" else data.nlargest(5, "Cantidad de Rentas")
+    st.write("### Análisis Estadístico")
 
-    analisis_texto = f"### Las 5 Locaciones con mayor **{metrica}:**\n\n"
+    analisis = []
 
-    for i, row in top_5.iterrows():
-        valor_formateado = f"{row['Cantidad de Rentas']:,.0f}" if metrica == "Cantidad de Rentas" else row["Dinero Generado ($USD)"]
-        analisis_texto += f"- **{row['Locación']}**: {valor_formateado}\n"
+    # Calcular valores clave
+    total_registros = len(data)
+    media = data.iloc[:, 1].mean()
+    mediana = data.iloc[:, 1].median()
+    desviacion = data.iloc[:, 1].std()
+    max_valor = data.iloc[:, 1].max()
+    min_valor = data.iloc[:, 1].min()
+    top_locacion = data.iloc[0, 0]
+    top_valor = data.iloc[0, 1]
 
-    st.markdown(f"{analisis_texto}")
+    analisis.append(f"📊 **Total de Ubicaciones analizadas:** {total_registros:,}")
+    analisis.append(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+    analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
+    analisis.append(f"📉 **Desviación estándar:** {desviacion:,.2f}")
+    analisis.append(f"🔝 **Locación con mayor {metrica}:** {top_locacion} con {top_valor:,.2f}")
+    analisis.append(f"🔽 **Menor {metrica}:** {min_valor:,.2f}")
+    analisis.append(f"🏆 **Mayor {metrica}:** {max_valor:,.2f}")
+    
+    # Análisis de dispersión
+    if desviacion > media * 0.5:
+        analisis.append(f"⚠️ **Alta variabilidad:** Existe una gran diferencia entre las locaciones en términos de {metrica}.")
+    
+    else:
+        analisis.append(f"✅ **Distribución estable:** No hay grandes diferencias extremas en {metrica}.")
+
+    # Análisis de concentración
+    percentil_90 = np.percentile(data.iloc[:, 1], 90)
+    percentil_10 = np.percentile(data.iloc[:, 1], 10)
+
+    # Análisis de concentración
+    if max_valor > percentil_90 * 1.5:
+        analisis.append(f"🚀 **El valor máximo ({max_valor:,.2f}) es significativamente superior al percentil 90.** Esto sugiere que una o pocas locaciones dominan la métrica.")
+    
+    elif max_valor < percentil_90:
+        analisis.append("📊 **El valor máximo no es muy superior al percentil 90.** Esto indica una distribución más uniforme.")
+
+    if top_valor > percentil_90 * 1.5:
+        analisis.append(f"🚀 **{top_locacion} está significativamente por encima del 90% de las locaciones.** Podría ser un punto estratégico clave.")
+    
+    if min_valor < percentil_10:
+        analisis.append(f"🔻 **Existen locaciones con valores por debajo del percentil 10.** Es recomendable analizar si se requieren optimizaciones de estrategias para mejorar estas tendencias.")
+
+    # Recomendaciones según tendencias
+    if media > 1000 and metrica == "Dinero Generado (USD)":
+        analisis.append("💰 **Los ingresos promedio son altos.** Se puede considerar estrategias para mantener esta tendencia positiva.")
+    
+    elif media < 500 and metrica == "Dinero Generado (USD)":
+        analisis.append("📉 **Ingresos promedio bajos.** Evaluar promociones o mejorar la distribución de vehículos.")
+    
+    if top_valor > media * 2:
+        analisis.append(f"🏆 **{top_locacion} es un líder {metrica}.** Se podría analizar su situación y estrategias para replicar en otras locaciones.")
+
+    # Mostrar el análisis
+    for linea in analisis:
+        st.write(linea)
 
     columnas_a_mostrar = ["Locación", "Cantidad de Rentas"] if metrica == "Cantidad de Rentas" else ["Locación", "Dinero Generado ($USD)"]
 
@@ -96,5 +147,5 @@ def grafica_loc():
     st.plotly_chart(fig)
 
 
-    with st.expander(f"Análisis detallado de {config_loc_in_out}"):
+    with st.expander(f"Análisis Detallado"):
         generar_analisis(data, metrica)

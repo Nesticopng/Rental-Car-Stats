@@ -89,7 +89,8 @@ def cargar_datos():
         for key, value in filters.items():
             if isinstance(value, list) and value:  # Filtrar listas con valores seleccionados
                 df = df[df[key.replace("_", "")].isin(value)]
-            elif isinstance(value, tuple):  # Rango de valores (min, max)
+
+            elif isinstance(value, tuple) and len(value) == 2:  # Rango de valores (min, max)
                 df = df[(df[key.replace("_", "")] >= value[0]) &
                         (df[key.replace("_", "")] <= value[1])]
 

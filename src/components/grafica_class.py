@@ -69,35 +69,55 @@ def generar_grafico(df, columna, titulo, eje_x, metrica):
 
 # Análisis Automatizado
 def mostrar_analisis(data, columna, nombre, metrica):
-    top = data.nlargest(5, "Cantidad" if metrica == "Vehículos Rentados" else "Promedio")
+    st.write("### Análisis Estadístico")
+
     data_tabla = data.rename(columns={columna: f"{nombre}"})
 
+    # Análisis estadístico
+    total_registros = len(data)
+    media = data.iloc[:, 1].mean()
+    mediana = data.iloc[:, 1].median()
+    desviacion = data.iloc[:, 1].std()
+    max_valor = data.iloc[:, 1].max()
+    min_valor = data.iloc[:, 1].min()
+    top_categoria = data.iloc[0, 0]
+    top_valor = data.iloc[0, 1]
+    
+    st.write(f"📊 **Total de registros analizados:** {total_registros:,}")
+    st.write(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+    st.write(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
+    st.write(f"📉 **Desviación estándar:** {desviacion:,.2f}")
     if metrica == "Vehículos Rentados":
-        st.write(f"### Los Vehículos más rentados según su {nombre} son:")
-
-    elif metrica == "Gasto Promedio ($USD)":
-        st.write(f"### Los Vehículos que más gastan en promedio según su {metrica} son:")
+        st.write(f"🔝 **Mayor {metrica}:** {top_categoria} con {top_valor:,}")
+        st.write(f"🔽 **Menor valor registrado:** {min_valor:,}")
+        st.write(f"🏆 **Mayor valor registrado:** {max_valor:,}")
 
     else:
-        st.write(f"### Vehículos que más días alquilan en promedio según su {metrica}:")
-
-    for i, row in top.iterrows():
-        if metrica == "Vehículos Rentados":
-            valor = f"{row['Cantidad']} vehículos rentados"
-
-        elif metrica == "Gasto Promedio ($USD)":
-            valor = f"${row['Promedio']:,.2f} en promedio"
-
-        else:
-            valor = f"{row['Promedio']:.2f} días en promedio"
+        st.write(f"🔝 **Mayor {metrica}:** {top_categoria} con {top_valor:,.2f}")
+        st.write(f"🔽 **Menor valor registrado:** {min_valor:,.2f}")
+        st.write(f"🏆 **Mayor valor registrado:** {max_valor:,.2f}")
         
-        st.write(f"- **{row[columna]}**: {valor}")
+    # Interpretaciones
+    if desviacion > media * 0.5:
+        st.write("⚠️ **Alta variabilidad:** Existen grandes diferencias entre categorías en esta métrica.")
+
+    else:
+        st.write("✅ **Distribución estable:** No hay grandes diferencias extremas en la métrica analizada.")
+    
+    if max_valor > media * 1.5:
+        st.write(f"🚀 **{top_categoria} tiene valores significativamente superiores a la media.**")
+    
+    if min_valor < media * 0.5:
+        st.write("🔻 **Algunas categorías están muy por debajo del promedio.**")
+    
+    data_tabla = data.rename(columns={columna: f"{nombre}"})
 
     if metrica in ["Gasto Promedio ($USD)", "Promedio de Días Rentados"]:
         data_tabla = data_tabla.drop(columns=["Promedio"])
 
     st.write("### Tabla de Datos")
     st.write(data_tabla)
+
 
 def grafica_vehiculos():
     st.header("Análisis de Vehículos Rentados")
