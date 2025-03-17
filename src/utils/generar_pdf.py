@@ -1,10 +1,19 @@
 """Este modulo genera un PDF con diferentes configuraciones"""
 
+from src.utils.paleta_rojo import rojo  # Importar la paleta de colores
 import matplotlib.pyplot as plt
 from src.utils.helpers import cargar_datos_sin_filtros
+from src.utils.paleta_rojo import rojo
+from matplotlib import rcParams
 from fpdf import FPDF
 import sys
 import os
+import calmap
+from datetime import datetime
+import pandas as pd
+from matplotlib.colors import ListedColormap, Normalize
+from matplotlib.cm import ScalarMappable
+from matplotlib.ticker import MaxNLocator
 
 sys.path.append(os.path.abspath(os.path.join(
     os.path.dirname(__file__), "..", "..")))
@@ -40,8 +49,11 @@ pdf.ln(4)
 pdf.multi_cell(0, 8, txt="Cano Vielma Néstor Alirio", align='R')
 pdf.ln(2)
 
+pdf.multi_cell(0, 8, txt="Briceño Torres Carmen Emilia", align='R')
+pdf.ln(2)
+
 pdf.multi_cell(0, 8, txt="Maneiro Chirino Ronald Alejandro", align='R')
-pdf.ln(30)
+pdf.ln(28)
 
 pdf.multi_cell(0, 8, txt="Caracas, marzo de 2025", align='C')
 
@@ -516,45 +528,361 @@ pdf.add_page()
 pdf.image("./assets/images/cuadro2.png", x=24, y=26, w=180)
 
 
-pdf.add_page()
-
-
 # Graficos
+pdf.add_page()
+pdf.set_font('Arial', "B", 12)
+pdf.ln(8)
+
+pdf.cell(0, 8, txt="Graficos y Análisis", align="C")
+pdf.ln(12)
+
+# Grafico de Vehiculos rentados segun su clasificacion
+
+image_folder = os.path.abspath("assets/images")
 
 
-def generarpdf():
+def generar_grafico_clasificacion():
     df = cargar_datos_sin_filtros()
 
-    # Verificar que la columna 'Class' exista
     if "Class" not in df.columns:
         print("Error: La columna 'Class' no está en los datos.")
-        return
+        return None
 
-    # Generar el gráfico de vehículos rentados por clasificación
     class_counts = df["Class"].value_counts()
 
-    plt.figure(figsize=(10, 6))
-    class_counts.plot(kind="bar", color="skyblue", edgecolor="black")
+    colores = rojo()
+    colores = colores[:len(class_counts)]
+    rcParams["font.family"] = "Arial"
 
+    plt.figure(figsize=(10, 6))
+    barras = class_counts.plot(kind="bar", color=colores, edgecolor="black")
     plt.xlabel("Clasificación de Vehículo")
-    plt.ylabel("Cantidad de Vehículos Rentados")
-    plt.title("Cantidad de Vehículos Rentados por Clasificación")
+    plt.ylabel("Vehículos Rentados")
+    plt.title("Análisis de Vehiculos Rentados según su Clasificación",
+              fontsize=14, fontweight="bold", fontname="Arial")
     plt.xticks(rotation=45)
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-    # Guardar el gráfico como imagen
-    graph_path = "vehiculos_rentados_clasificacion.png"
+    for barra in barras.patches:
+        height = barra.get_height()
+        plt.text(barra.get_x() + barra.get_width() / 2, height + 0.5,  # Ajusta la posición vertical si es necesario
+                 f"{int(height)}",  # Mostrar el valor entero
+                 ha='center', va='bottom', fontsize=10, fontweight='bold')
+    # Guardar correctamente en assets/images/
+    graph_path = os.path.join(
+        image_folder, "vehiculos_rentados_clasificacion.png")
     plt.savefig(graph_path, bbox_inches="tight")
     plt.close()
 
-    pdf.image(graph_path, x=10, y=30, w=180)
+    if os.path.exists(graph_path):
+        print(f"✅ Gráfico guardado en: {graph_path}")
+    else:
+        print("❌ Error al guardar el gráfico")
+        return None
+    return graph_path  # Retornar la ruta correcta
+
+# Grafico de Promedio de Rentas
 
 
-# Llamar a la función para ejecutar el proceso
-generarpdf()
+def generar_grafico_promedio_rentas():
+    df = cargar_datos_sin_filtros()
+
+    if not all(col in df.columns for col in ['Class', 'TotalBill', 'RDays']):
+        print("❌ Error: Faltan columnas en los datos.")
+        return None
+
+    df['AvgRentalCost'] = df['TotalBill'] / df['RDays']
+    gasto_promedio = df.groupby('Class')['AvgRentalCost'].mean()
+    colores = rojo()
+    plt.figure(figsize=(12, 6))
+    barras = plt.bar(gasto_promedio.index, gasto_promedio.values,
+                     # Usar primer color de la paleta
+                     color=colores[:len(gasto_promedio)])
+    plt.xlabel("Clasificación", fontsize=12, fontname="Arial")
+    plt.ylabel("Gasto Promedio ($USD)", fontsize=12, fontname="Arial")
+    plt.title("Análisis de Gasto Promedio ($USD) de Gasto Diario según Clasificación",
+              fontsize=14, fontweight="bold", fontname="Arial")
+    plt.xticks(rotation=45, fontsize=12, fontname="Arial")
+    plt.yticks(fontsize=12, fontname="Arial")
+
+    for barra in barras:
+        height = barra.get_height()
+        plt.text(barra.get_x() + barra.get_width() / 2, height + 2,
+                 f"${height:.2f}",  # Formato: $X.XX
+                 ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    graph_path = os.path.abspath("assets/images/gasto_promedio_rentas.png")
+    plt.savefig(graph_path, bbox_inches="tight")
+    plt.close()
+
+    if os.path.exists(graph_path):
+        print(f"✅ Gráfico guardado en: {graph_path}")
+        return graph_path
+    else:
+        print("❌ Error al guardar el gráfico")
+        return None
+
+# Grafico de rentas generadas por empresa
 
 
-# pdf.multi_cell(100, 20, txt="adfshg", border=1, align="J")
+def generar_grafico_rentas_por_empresa():
+    df = cargar_datos_sin_filtros()
+
+    if 'Source' not in df.columns:
+        print("❌ Error: La columna 'Source' no está en los datos.")
+        return None
+    rentas_por_empresa = df['Source'].value_counts()
+
+    colores = rojo()
+
+    plt.figure(figsize=(12, 6))
+    plt.bar(rentas_por_empresa.index, rentas_por_empresa.values,
+            color=colores[:len(rentas_por_empresa)])
+
+    plt.xlabel("Empresa", fontsize=12, fontname="Arial")
+    plt.ylabel("Cantidad de Vehiculos Rentados", fontsize=12, fontname="Arial")
+    plt.title("Rentas Generadas según la Empresa", fontsize=14,
+              fontweight="bold", fontname="Arial")
+    plt.xticks(rotation=45, fontsize=10, fontname="Arial")
+    plt.yticks(fontsize=10, fontname="Arial")
+
+    for i, v in enumerate(rentas_por_empresa.values):
+        plt.text(i, v + 5, str(v), ha='center', fontsize=10, fontweight='bold')
+
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    graph_path = os.path.abspath("assets/images/rentas_por_empresa.png")
+    plt.savefig(graph_path, bbox_inches="tight")
+    plt.close()
+
+    if os.path.exists(graph_path):
+        print(f"✅ Gráfico guardado en: {graph_path}")
+        return graph_path
+    else:
+        print("❌ Error al guardar el gráfico")
+        return None
+
+# Cantidad Generado por la tarifa total
+
+
+def generar_grafico_tarifa_total_por_empresa():
+    df = cargar_datos_sin_filtros()
+
+    if not all(col in df.columns for col in ['Source', 'TotalBill']):
+        print("✕ Error: Faltan columnas en los datos.")
+        return None
+
+    tarifa_total_por_empresa = df.groupby('Source')['TotalBill'].sum()
+
+    colores = rojo()
+
+    plt.figure(figsize=(12, 6))
+    plt.bar(tarifa_total_por_empresa.index, tarifa_total_por_empresa.values,
+            color=colores[:len(tarifa_total_por_empresa)])
+
+    plt.xlabel("Empresa", fontsize=12, fontname="Arial")
+    plt.ylabel("Monto ($USD)", fontsize=12, fontname="Arial")
+    plt.title("Dinero Recaudado por Tarifa Total según la Empresa",
+              fontsize=14, fontweight="bold", fontname="Arial")
+
+    plt.xticks(rotation=45, fontsize=10, fontname="Arial")
+    plt.yticks(fontsize=10, fontname="Arial")
+
+    for i, v in enumerate(tarifa_total_por_empresa.values):
+        plt.text(i, v + 1000, f"${v:,.2f}",
+                 ha='center', fontsize=10, fontweight='bold')
+
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    graph_path = os.path.abspath("assets/images/tarifa_total_por_empresa.png")
+    plt.savefig(graph_path, bbox_inches="tight")
+    plt.close()
+
+    if os.path.exists(graph_path):
+        print(f"✔ Gráfico guardado en: {graph_path}")
+        return graph_path
+    else:
+        print("✕ Error al guardar el gráfico")
+        return None
+# Tasa Porcentual de los Pre-Depositos
+
+
+def generar_grafico_pre_depositos():
+    # Cargar los datos desde la base de datos
+    df = cargar_datos_sin_filtros()
+
+    # Verificar si la columna 'res_prepagos' existe
+    if 'res_prepagos' not in df.columns:
+        print("❌ Error: La columna 'res_prepagos' no está en los datos.")
+        return None
+
+    hizo_predeposito = df[df['res_prepagos'] > 0].shape[0]
+    no_hizo_predeposito = df[df['res_prepagos'] == 0].shape[0]
+
+    sizes = [hizo_predeposito, no_hizo_predeposito]
+    labels = ['Hizo Pre-Depósito', 'No hizo Pre-Depósito']
+    colors = ['#2E9449', '#C0392B']
+
+    # Crear el gráfico de pastel
+    fig, ax = plt.subplots(figsize=(6, 4))
+    wedges, texts, autotexts = ax.pie(
+        sizes,
+        labels=None,
+        autopct='%1.1f%%',
+        startangle=90,
+        colors=colors,
+        textprops={'fontsize': 12, 'fontname': "Arial"},
+
+    )
+
+    for autotext in autotexts:
+        autotext.set_fontsize(12)
+        autotext.set_fontweight('bold')
+        autotext.set_color('white')
+
+    # Título del gráfico
+    plt.title("Tasa Porcentual de los Pre-Depósitos",
+              fontsize=14, fontweight="bold", fontname="Arial")
+
+    # Leyenda
+    plt.legend(wedges, labels, title="Leyenda", loc="center left",
+               bbox_to_anchor=(1, 0, 0.5, 1), prop={'size': 10})
+
+    # Guardar el gráfico como imagen
+    graph_path = os.path.abspath("assets/images/pre_depositos_pie_chart.png")
+    plt.savefig(graph_path, bbox_inches='tight')
+    plt.close()
+
+    # Verificar si el archivo se guardó correctamente
+    if os.path.exists(graph_path):
+        print(f"✅ Gráfico guardado en: {graph_path}")
+        return graph_path
+    else:
+        print("❌ Error al guardar el gráfico")
+        return None
+
+# Calendario de Rentas
+
+
+def generar_calendario_transacciones_rentas():
+    df = cargar_datos_sin_filtros()
+
+    if not all(col in df.columns for col in ['Pickupd', 'TotalBill']):
+        print("✕ Error: Faltan columnas requeridas en los datos.")
+        return None
+
+    # Procesar datos: convertir las columnas a los formatos correctos
+    # Convertir 'Pickupd' a tipo fecha
+    df['Pickupd'] = pd.to_datetime(df['Pickupd'], errors='coerce')
+    # Convertir 'TotalBill' a numérico
+    df['TotalBill'] = pd.to_numeric(df['TotalBill'], errors='coerce')
+    # Eliminar filas con valores nulos en estas columnas
+    df = df.dropna(subset=['Pickupd', 'TotalBill'])
+
+    # Agrupar por día y sumar las transacciones diarias
+    transacciones_por_dia = df.groupby(df['Pickupd'].dt.date)[
+        'TotalBill'].sum()
+
+    # Crear una serie temporal para el gráfico
+    serie_temporal = pd.Series(
+        transacciones_por_dia.values, index=pd.to_datetime(
+            transacciones_por_dia.index)
+    )
+
+    # Validar que haya datos en la serie temporal
+    if serie_temporal.empty:
+        print("✕ Error: No hay datos válidos para generar el gráfico.")
+        return None
+
+    # Definir la paleta de colores personalizada
+    colores_personalizados = ListedColormap(['#FFEBEE', '#FFCDD2', '#FFAB91', '#FF8A80',
+                                             '#FF6F61', '#EF9A9A', '#E57373', '#F44336',
+                                             '#EF5350', '#E53935', '#D84315', '#D32F2F',
+                                             '#C62828', '#B71C1C', '#A52A2A', '#8B0000',
+                                             '#7A2A2A', '#5F1A1A', '#450A0A', '#2A0000'])  # Más oscuro = mayor renta
+
+    # Crear el gráfico de calendario
+    fig, ax = plt.subplots(figsize=(12, 8))
+    calmap.yearplot(serie_temporal, year=2024,
+                    cmap=colores_personalizados, linewidth=0.5, ax=ax)
+
+    # Añadir título y personalizar la leyenda (barra de colores)
+    ax.set_title("Calendario de Rentas 2024", fontsize=16,
+                 fontweight="bold", fontname="Arial")
+    mappable = plt.cm.ScalarMappable(cmap=colores_personalizados, norm=Normalize(
+        vmin=serie_temporal.min(), vmax=serie_temporal.max()))
+    cbar = fig.colorbar(
+        mappable, ax=ax, orientation='vertical', fraction=0.03, pad=0.04)
+
+    cbar.set_label("Total de Rentas", fontsize=9)  # Etiqueta discreta
+    # Reducir el tamaño de las etiquetas numéricas
+    cbar.ax.tick_params(labelsize=7)
+    # Mostrar números enteros en la barra de colores
+    cbar.ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+    # Guardar el gráfico en 'assets/images'
+    graph_path = os.path.abspath(
+        "assets/images/calendario_transacciones_rentas_2024.png")
+
+    try:
+        plt.savefig(graph_path, bbox_inches="tight")  # Guardar el gráfico
+        plt.close()  # Cerrar la figura
+        print(f"✔ Gráfico guardado en: {graph_path}")
+        return graph_path
+    except Exception as e:
+        print(f"✕ Error al guardar el gráfico: {str(e)}")
+        return None
+
+
+graph_path_1 = generar_grafico_clasificacion()
+if graph_path_1 and os.path.exists(graph_path_1):
+    pdf.image(graph_path_1.replace("\\", "/"), x=10, y=50, w=180)
+else:
+    print("❌ No se pudo agregar el gráfico de clasificación al PDF.")
+
+pdf.add_page()
+
+graph_path_2 = generar_grafico_promedio_rentas()
+if graph_path_2 and os.path.exists(graph_path_2):
+    pdf.image(graph_path_2.replace("\\", "/"), x=10, y=30, w=180)
+
+else:
+    print("❌ No se pudo agregar el gráfico de gasto promedio al PDF.")
+
+pdf.add_page()
+
+graph_path_3 = generar_grafico_rentas_por_empresa()
+if graph_path_3 and os.path.exists(graph_path_3):
+    pdf.image(graph_path_3.replace("\\", "/"), x=10, y=30, w=180)
+else:
+    print("❌ No se pudo agregar el gráfico de rentas por empresa al PDF.")
+
+pdf.add_page()
+
+graph_path_4 = generar_grafico_tarifa_total_por_empresa()
+if graph_path_4 and os.path.exists(graph_path_4):
+    pdf.image(graph_path_4.replace("\\", "/"), x=10, y=30, w=180)
+else:
+    print("✕ No se pudo agregar el gráfico de tarifa total al PDF.")
+
+pdf.add_page()
+
+graph_path_5 = generar_grafico_pre_depositos()
+if graph_path_5 and os.path.exists(graph_path_5):
+    pdf.image(graph_path_5.replace("\\", "/"), x=10, y=30, w=180)
+else:
+    print("❌ No se pudo agregar el gráfico de gasto promedio al PDF.")
+
+pdf.add_page()
+
+graph_path_6 = generar_calendario_transacciones_rentas()
+if graph_path_6 and os.path.exists(graph_path_6):
+    pdf.image(graph_path_6.replace("\\", "/"), x=10, y=30, w=180)
+else:
+    print("❌ No se pudo agregar el gráfico de gasto promedio al PDF.")
+
 
 # Referencias Bibliograficas
 pdf.add_page()
@@ -650,4 +978,6 @@ pdf.ln(8)
 # pdf.multi_cell(0,8, txt= "",align= "J" )
 
 
-pdf.output('Trabajo final.pdf')
+def generar_pdf(output_path="Trabajo_final.pdf"):
+    pdf.output(output_path)
+    return output_path

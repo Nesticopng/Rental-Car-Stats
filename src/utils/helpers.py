@@ -5,9 +5,10 @@ from pyairports.airports import Airports
 
 
 def cargar_datos_sin_filtros():
-    
+
     # Cargar el archivo
-    df = pd.read_excel(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "BD.xlsx")))
+    df = pd.read_excel(os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "data", "raw", "BD.xlsx")))
     columnas = df.columns.tolist()
 
     # Cargar decodificador (IATA)
@@ -48,34 +49,38 @@ def cargar_datos_sin_filtros():
     # Reordena las columnas para que queden después de "Class"
     columnas_a_mover = ["Category", "Type", "Transmission", "Fuel"]
     columnas_reordenadas = (
-        columnas[:columnas.index("Class")+1] + 
-        columnas_a_mover + 
-        [col for col in columnas if col not in columnas_a_mover and col not in columnas[:columnas.index("Class")+1]]
+        columnas[:columnas.index("Class")+1] +
+        columnas_a_mover +
+        [col for col in columnas if col not in columnas_a_mover and col not in columnas[:columnas.index(
+            "Class")+1]]
     )
 
     # Reordena las columnas para que queden después de "LocOut"
     columnas_a_mover = ["LocOutCity", "LocOutCountry"]
     columnas_reordenadas = (
-        columnas_reordenadas[:columnas_reordenadas.index("LocOut")+1] + 
-        columnas_a_mover + 
-        [col for col in columnas_reordenadas if col not in columnas_a_mover and col not in columnas_reordenadas[:columnas_reordenadas.index("LocOut")+1]]
+        columnas_reordenadas[:columnas_reordenadas.index("LocOut")+1] +
+        columnas_a_mover +
+        [col for col in columnas_reordenadas if col not in columnas_a_mover and col not in columnas_reordenadas[:
+                                                                                                                columnas_reordenadas.index("LocOut")+1]]
     )
-    
+
     # Reordena las columnas para que queden después de "LocIn"
     columnas_a_mover = ["LocInCity", "LocInCountry"]
     columnas_reordenadas = (
-        columnas_reordenadas[:columnas_reordenadas.index("LocIn")+1] + 
-        columnas_a_mover + 
-        [col for col in columnas_reordenadas if col not in columnas_a_mover and col not in columnas_reordenadas[:columnas_reordenadas.index("LocIn")+1]]
+        columnas_reordenadas[:columnas_reordenadas.index("LocIn")+1] +
+        columnas_a_mover +
+        [col for col in columnas_reordenadas if col not in columnas_a_mover and col not in columnas_reordenadas[:
+                                                                                                                columnas_reordenadas.index("LocIn")+1]]
     )
 
     # Aplica el nuevo orden
     df = df[columnas_reordenadas]
-                
+
     return df
 
+
 def cargar_datos():
-        # Aplicar Filtros si existen
+    # Aplicar Filtros si existen
     df = cargar_datos_sin_filtros()
 
     if "filters" in st.session_state:
@@ -85,6 +90,7 @@ def cargar_datos():
             if isinstance(value, list) and value:  # Filtrar listas con valores seleccionados
                 df = df[df[key.replace("_", "")].isin(value)]
             elif isinstance(value, tuple):  # Rango de valores (min, max)
-                df = df[(df[key.replace("_", "")] >= value[0]) & (df[key.replace("_", "")] <= value[1])]
+                df = df[(df[key.replace("_", "")] >= value[0]) &
+                        (df[key.replace("_", "")] <= value[1])]
 
     return df
