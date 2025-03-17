@@ -11,8 +11,8 @@ df = cargar_datos()
 variable_mapping = {
     "Cantidad de Rentas": "Cantidad",
     "Dinero Recaudado por Tarifa Básica": "TotalRate",
-    "Extras Gastados": "TotalExtras",
-    "Tarifa Total": "TotalBill",
+    "Dinero Recaudado por Extras Gastados": "TotalExtras",
+    "Dinero Recaudado por Tarifa Total": "TotalBill",
     "Promedio de Días Rentados": "RDays"
 }
 
