@@ -1,6 +1,6 @@
 """Este modulo genera un PDF con diferentes configuraciones"""
 
-from src.utils.paleta_rojo import rojo  # Importar la paleta de colores
+from src.utils.paleta_rojo import rojo
 import matplotlib.pyplot as plt
 from src.utils.helpers import cargar_datos_sin_filtros
 from src.utils.paleta_rojo import rojo
@@ -9,14 +9,12 @@ from fpdf import FPDF
 import sys
 import os
 import calmap
-from datetime import datetime
 import pandas as pd
 from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.cm import ScalarMappable
 from matplotlib.ticker import MaxNLocator
-
-sys.path.append(os.path.abspath(os.path.join(
-    os.path.dirname(__file__), "..", "..")))
+import numpy as np
+import seaborn as sns
 
 # """
 # P: portrait(vertical)
@@ -53,7 +51,9 @@ pdf.multi_cell(0, 8, txt="Briceño Torres Carmen Emilia", align='R')
 pdf.ln(2)
 
 pdf.multi_cell(0, 8, txt="Maneiro Chirino Ronald Alejandro", align='R')
-pdf.ln(28)
+pdf.ln(2)
+pdf.multi_cell(0, 8, txt="Profesor. Jesús Ochoa", align='L')
+pdf.ln(15)
 
 pdf.multi_cell(0, 8, txt="Caracas, marzo de 2025", align='C')
 
@@ -138,9 +138,6 @@ pdf.multi_cell(
 
 pdf.ln(8)
 
-pdf.multi_cell(0, 8, txt="     Establecer la seguridad y protección de datos mediante protocolos de autenticación y almacenamiento seguro.", align="J")
-pdf.ln(8)
-
 pdf.multi_cell(
     0, 8, txt="     Incorporar una sección que genere un resumen automatizado que refleje la base de datos.", align="J")
 
@@ -208,7 +205,7 @@ pdf.multi_cell(0, 8, txt="Reseña Histórica", align="J")
 pdf.ln(8)
 
 pdf.set_font('Arial', '', 12)
-pdf.multi_cell(0, 8, txt="ACO RENT A CAR, se ha caracterizado por ofrecer un servicio de alquiler de vehículos, que tiene presencia en el mercado por más de 40 años. La empresa se distingue por brindar flexibilidad y comodidad, ideales para vacaciones en familia o viajes de negocios. A lo largo de su trayectoria, ha mantenido un enfoque en la satisfacción del cliente, asegurando que sus vehículos se encuentren en excelentes condiciones y proporcionando asistencia en carretera de alta calidad (página WEB).", align="J")
+pdf.multi_cell(0, 8, txt="ACO RENT A CAR, se ha caracterizado por ofrecer un servicio de alquiler de vehículos, que tiene presencia en el mercado por más de 40 años. La empresa se distingue por brindar flexibilidad y comodidad, ideales para vacaciones en familia o viajes de negocios. A lo largo de su trayectoria, ha mantenido un enfoque en la satisfacción del cliente, asegurando que sus vehículos se encuentren en excelentes condiciones y proporcionando asistencia en carretera de alta calidad.", align="J")
 pdf.ln(8)
 
 pdf.set_font('Arial', 'B', 12)
@@ -409,7 +406,7 @@ pdf.multi_cell(0, 8, txt="Antecendetes de la Investigación", align="C")
 pdf.ln(8)
 
 pdf.set_font('Arial', '', 12)
-pdf.multi_cell(0, 8, txt="     Para respaldar el análisis y los datos proporcionados en la base de datos, se debe mencionar que existen múltiples investigaciones que abordan lo referente al alquiler de autos y de la industria automotriz, a continuación, se presenta una serie estas usadas como referencias:", align="J")
+pdf.multi_cell(0, 8, txt="     Para respaldar el análisis y los datos proporcionados en la base de datos, se debe mencionar que existen múltiples investigaciones que abordan lo referente al alquiler de autos y de la industria automotriz, a continuación, se presenta una serie de estas usadas como referencias:", align="J")
 pdf.ln(8)
 
 pdf.multi_cell(0, 8, txt="     La empresa Hertz Digital (2022), realizó un trabajo cuyo objetivo principal era el desarrollo de su aplicación para mejorar la experiencia del usuario mediante una integración efectiva con tecnologías digitales, incluyendo inteligencia artificial (IA). Con esto buscó ofrecer una reserva y alquiler más personalizados y eficientes. Esta propuesta consistió en; 1. trabajar con empresas como Google para mejorar el marketing basado en datos. 2. Crear aplicaciones móviles que permitan a los usuarios alquilar vehículos fácilmente. Y 3. La integración de IA, Utilizando datos para personalizar mensajes y servicios según las preferencias del cliente.", align="J")
@@ -446,7 +443,7 @@ pdf.multi_cell(
     0, 8, txt="     El trabajo es de tipo estadístico descriptivo, según Lincoln Chao (1975) lo define como: ", align="J")
 pdf.ln(8)
 
-pdf.multi_cell(0, 6, txt="     la parte de la estadística que se ocupa del resumen y descripción de los datos. Este resumen puede ser tabular, gráfico o numérico. El análisis se limita a los datos recolectados y no se realizan inferencias o generalizaciones sobre la población de la cual provienen estas observaciones. Es decir, la estadística descriptiva no es más que el trabajo preliminar para la inferencia", align="C")
+pdf.multi_cell(0, 6, txt="     La parte de la estadística que se ocupa del resumen y descripción de los datos. Este resumen puede ser tabular, gráfico o numérico. El análisis se limita a los datos recolectados y no se realizan inferencias o generalizaciones sobre la población de la cual provienen estas observaciones. Es decir, la estadística descriptiva no es más que el trabajo preliminar para la inferencia", align="C")
 pdf.ln(8)
 
 pdf.multi_cell(0, 8, txt="     De igual forma, permite el uso de un conjunto de técnicas para la recopilación, presentación y caracterización de datos con el fin de describir sus principales características de manera cuantitativa. Utiliza medidas como la media, mediana, moda, desviación estándar, entre otras, para resumir y analizar datos, facilitando su interpretación y comprensión sin hacer inferencias sobre un grupo más amplio.", align="J")
@@ -543,7 +540,6 @@ image_folder = os.path.abspath("assets/images")
 
 def generar_grafico_clasificacion():
     df = cargar_datos_sin_filtros()
-
     if "Class" not in df.columns:
         print("Error: La columna 'Class' no está en los datos.")
         return None
@@ -565,10 +561,10 @@ def generar_grafico_clasificacion():
 
     for barra in barras.patches:
         height = barra.get_height()
-        plt.text(barra.get_x() + barra.get_width() / 2, height + 0.5,  # Ajusta la posición vertical si es necesario
-                 f"{int(height)}",  # Mostrar el valor entero
+        plt.text(barra.get_x() + barra.get_width() / 2, height + 0.5,
+                 f"{int(height)}",
                  ha='center', va='bottom', fontsize=10, fontweight='bold')
-    # Guardar correctamente en assets/images/
+
     graph_path = os.path.join(
         image_folder, "vehiculos_rentados_clasificacion.png")
     plt.savefig(graph_path, bbox_inches="tight")
@@ -579,7 +575,7 @@ def generar_grafico_clasificacion():
     else:
         print("❌ Error al guardar el gráfico")
         return None
-    return graph_path  # Retornar la ruta correcta
+    return graph_path
 
 # Grafico de Promedio de Rentas
 
@@ -596,7 +592,7 @@ def generar_grafico_promedio_rentas():
     colores = rojo()
     plt.figure(figsize=(12, 6))
     barras = plt.bar(gasto_promedio.index, gasto_promedio.values,
-                     # Usar primer color de la paleta
+
                      color=colores[:len(gasto_promedio)])
     plt.xlabel("Clasificación", fontsize=12, fontname="Arial")
     plt.ylabel("Gasto Promedio ($USD)", fontsize=12, fontname="Arial")
@@ -608,7 +604,7 @@ def generar_grafico_promedio_rentas():
     for barra in barras:
         height = barra.get_height()
         plt.text(barra.get_x() + barra.get_width() / 2, height + 2,
-                 f"${height:.2f}",  # Formato: $X.XX
+                 f"${height:.2f}",
                  ha='center', va='bottom', fontsize=10, fontweight='bold')
 
     plt.grid(axis="y", linestyle="--", alpha=0.7)
@@ -710,10 +706,9 @@ def generar_grafico_tarifa_total_por_empresa():
 
 
 def generar_grafico_pre_depositos():
-    # Cargar los datos desde la base de datos
+
     df = cargar_datos_sin_filtros()
 
-    # Verificar si la columna 'res_prepagos' existe
     if 'res_prepagos' not in df.columns:
         print("❌ Error: La columna 'res_prepagos' no está en los datos.")
         return None
@@ -725,7 +720,6 @@ def generar_grafico_pre_depositos():
     labels = ['Hizo Pre-Depósito', 'No hizo Pre-Depósito']
     colors = ['#2E9449', '#C0392B']
 
-    # Crear el gráfico de pastel
     fig, ax = plt.subplots(figsize=(6, 4))
     wedges, texts, autotexts = ax.pie(
         sizes,
@@ -742,20 +736,16 @@ def generar_grafico_pre_depositos():
         autotext.set_fontweight('bold')
         autotext.set_color('white')
 
-    # Título del gráfico
     plt.title("Tasa Porcentual de los Pre-Depósitos",
               fontsize=14, fontweight="bold", fontname="Arial")
 
-    # Leyenda
     plt.legend(wedges, labels, title="Leyenda", loc="center left",
                bbox_to_anchor=(1, 0, 0.5, 1), prop={'size': 10})
 
-    # Guardar el gráfico como imagen
     graph_path = os.path.abspath("assets/images/pre_depositos_pie_chart.png")
     plt.savefig(graph_path, bbox_inches='tight')
     plt.close()
 
-    # Verificar si el archivo se guardó correctamente
     if os.path.exists(graph_path):
         print(f"✅ Gráfico guardado en: {graph_path}")
         return graph_path
@@ -766,81 +756,182 @@ def generar_grafico_pre_depositos():
 # Calendario de Rentas
 
 
-def generar_calendario_transacciones_rentas():
+image_folder = os.path.abspath("assets/images")
+os.makedirs(image_folder, exist_ok=True)
+
+
+def generar_calendario_transacciones_rentas(year=2024):
+    """Genera un gráfico de calendario con las rentas totales por día en un diseño limpio."""
     df = cargar_datos_sin_filtros()
 
-    if not all(col in df.columns for col in ['Pickupd', 'TotalBill']):
-        print("✕ Error: Faltan columnas requeridas en los datos.")
+    if "Pickupd" not in df.columns or "TotalBill" not in df.columns:
+        print("❌ Error: La base de datos no contiene las columnas requeridas.")
         return None
 
-    # Procesar datos: convertir las columnas a los formatos correctos
-    # Convertir 'Pickupd' a tipo fecha
     df['Pickupd'] = pd.to_datetime(df['Pickupd'], errors='coerce')
-    # Convertir 'TotalBill' a numérico
     df['TotalBill'] = pd.to_numeric(df['TotalBill'], errors='coerce')
-    # Eliminar filas con valores nulos en estas columnas
-    df = df.dropna(subset=['Pickupd', 'TotalBill'])
 
-    # Agrupar por día y sumar las transacciones diarias
-    transacciones_por_dia = df.groupby(df['Pickupd'].dt.date)[
-        'TotalBill'].sum()
+    df = df[df['Pickupd'].dt.year == year]
 
-    # Crear una serie temporal para el gráfico
-    serie_temporal = pd.Series(
-        transacciones_por_dia.values, index=pd.to_datetime(
-            transacciones_por_dia.index)
-    )
+    rentas_diarias = df.groupby(df['Pickupd'].dt.date)['TotalBill'].sum()
 
-    # Validar que haya datos en la serie temporal
-    if serie_temporal.empty:
-        print("✕ Error: No hay datos válidos para generar el gráfico.")
+    if rentas_diarias.empty:
+        print(f"❌ No hay datos disponibles para el año {year}.")
         return None
 
-    # Definir la paleta de colores personalizada
-    colores_personalizados = ListedColormap(['#FFEBEE', '#FFCDD2', '#FFAB91', '#FF8A80',
-                                             '#FF6F61', '#EF9A9A', '#E57373', '#F44336',
-                                             '#EF5350', '#E53935', '#D84315', '#D32F2F',
-                                             '#C62828', '#B71C1C', '#A52A2A', '#8B0000',
-                                             '#7A2A2A', '#5F1A1A', '#450A0A', '#2A0000'])  # Más oscuro = mayor renta
+    rentas_diarias = pd.Series(
+        rentas_diarias.values, index=pd.to_datetime(rentas_diarias.index))
 
-    # Crear el gráfico de calendario
-    fig, ax = plt.subplots(figsize=(12, 8))
-    calmap.yearplot(serie_temporal, year=2024,
-                    cmap=colores_personalizados, linewidth=0.5, ax=ax)
+    colores = ListedColormap([
+        '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a',
+        '#ef3b2c', '#cb181d', '#a50f15', '#67000d'
+    ])
 
-    # Añadir título y personalizar la leyenda (barra de colores)
-    ax.set_title("Calendario de Rentas 2024", fontsize=16,
-                 fontweight="bold", fontname="Arial")
-    mappable = plt.cm.ScalarMappable(cmap=colores_personalizados, norm=Normalize(
-        vmin=serie_temporal.min(), vmax=serie_temporal.max()))
+    fig, ax = plt.subplots(figsize=(15, 4))
+    calmap.yearplot(rentas_diarias, year=year,
+                    cmap=colores, linewidth=0.2, ax=ax)
+
+    ax.set_title(f"Calendario de Rentas {year}", fontsize=14,
+                 fontweight="bold", fontname="Arial", pad=15)
+
+    mappable = plt.cm.ScalarMappable(cmap=colores, norm=Normalize(
+        vmin=rentas_diarias.min(), vmax=rentas_diarias.max()))
     cbar = fig.colorbar(
-        mappable, ax=ax, orientation='vertical', fraction=0.03, pad=0.04)
-
-    cbar.set_label("Total de Rentas", fontsize=9)  # Etiqueta discreta
-    # Reducir el tamaño de las etiquetas numéricas
-    cbar.ax.tick_params(labelsize=7)
-    # Mostrar números enteros en la barra de colores
+        mappable, ax=ax, orientation='vertical', fraction=0.03, pad=0.05)
+    cbar.set_label("Total de Rentas", fontsize=10, labelpad=10)
+    cbar.ax.tick_params(labelsize=8)
     cbar.ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-    # Guardar el gráfico en 'assets/images'
-    graph_path = os.path.abspath(
-        "assets/images/calendario_transacciones_rentas_2024.png")
+    graph_path = os.path.join(
+        image_folder, f"calendario_transacciones_rentas_{year}.png")
 
     try:
-        plt.savefig(graph_path, bbox_inches="tight")  # Guardar el gráfico
-        plt.close()  # Cerrar la figura
-        print(f"✔ Gráfico guardado en: {graph_path}")
+        plt.savefig(graph_path, bbox_inches="tight",
+                    dpi=300)
+        plt.close()
+        print(f"✅ Gráfico guardado en: {graph_path}")
         return graph_path
     except Exception as e:
-        print(f"✕ Error al guardar el gráfico: {str(e)}")
+        print(f"❌ Error al guardar el gráfico: {str(e)}")
         return None
+
+# Calendario de reservaciones
+
+
+def generar_calendario_reservas(year=2024):
+    """Genera un gráfico de calendario con la cantidad de reservaciones por día."""
+    df = cargar_datos_sin_filtros()
+
+    if "Pickupd" not in df.columns:
+        print("❌ Error: La base de datos no contiene la columna 'Pickupd'.")
+        return None
+
+    df['Pickupd'] = pd.to_datetime(df['Pickupd'], errors='coerce')
+    df = df[df['Pickupd'].dt.year == year]
+
+    reservas_diarias = df.groupby(df['Pickupd'].dt.date).size()
+
+    if reservas_diarias.empty:
+        print(f"❌ No hay datos disponibles para el año {year}.")
+        return None
+
+    reservas_diarias = pd.Series(
+        reservas_diarias.values, index=pd.to_datetime(reservas_diarias.index))
+
+    colores = ListedColormap([
+        '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a',
+        '#ef3b2c', '#cb181d', '#a50f15', '#67000d'
+    ])
+
+    fig, ax = plt.subplots(figsize=(15, 4))
+    calmap.yearplot(reservas_diarias, year=year,
+                    cmap=colores, linewidth=0.2, ax=ax)
+
+    ax.set_title(f"Calendario de Reservas {year}", fontsize=14,
+                 fontweight="bold", fontname="Arial", pad=15)
+
+    mappable = plt.cm.ScalarMappable(cmap=colores, norm=Normalize(
+        vmin=reservas_diarias.min(), vmax=reservas_diarias.max()))
+    cbar = fig.colorbar(
+        mappable, ax=ax, orientation='vertical', fraction=0.03, pad=0.05)
+    cbar.set_label("Número de Reservas", fontsize=10, labelpad=10)
+    cbar.ax.tick_params(labelsize=8)
+    cbar.ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+    image_folder = os.path.abspath("assets/images")
+    os.makedirs(image_folder, exist_ok=True)
+    graph_path = os.path.join(image_folder, f"calendario_reservas_{year}.png")
+
+    try:
+        plt.savefig(graph_path, bbox_inches="tight", dpi=300)
+        plt.close()
+        print(f"✅ Gráfico guardado en: {graph_path}")
+        return graph_path
+    except Exception as e:
+        print(f"❌ Error al guardar el gráfico: {str(e)}")
+        return None
+
+# Grafico de ingresos por ubicacion segun codigo IATA
+
+
+image_folder = os.path.abspath("assets/images")
+os.makedirs(image_folder, exist_ok=True)
+
+colores = rojo()
+
+
+def generar_grafico_ingresos_por_ubicacion():
+    """Genera un gráfico de ingresos totales por ubicación según código IATA (barras verticales)."""
+    df = cargar_datos_sin_filtros()
+
+    if "LocOut" not in df.columns or "TotalBill" not in df.columns:
+        print("❌ Error: La base de datos no contiene las columnas requeridas.")
+        return None
+
+    df['TotalBill'] = pd.to_numeric(df['TotalBill'], errors='coerce')
+    df = df.dropna(subset=['TotalBill'])
+
+    ingresos_por_ubicacion = df.groupby(
+        'LocOut')['TotalBill'].sum().sort_values(ascending=False)
+
+    if ingresos_por_ubicacion.empty:
+        print("❌ No hay datos disponibles para generar el gráfico.")
+        return None
+
+    plt.figure(figsize=(12, 6))
+    sns.barplot(
+        x=ingresos_por_ubicacion.index,
+        y=ingresos_por_ubicacion.values,
+        palette=colores
+    )
+
+    plt.xlabel("Código IATA", fontsize=12, fontweight="bold")
+    plt.ylabel("Ingresos Totales", fontsize=12, fontweight="bold")
+    plt.title("Ingresos Totales por Ubicación (Código IATA)",
+              fontsize=14, fontweight="bold", pad=15)
+
+    plt.xticks(rotation=45, ha="right", fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+    graph_path = os.path.join(image_folder, "ingresos_por_ubicacion.png")
+
+    try:
+        plt.savefig(graph_path, bbox_inches="tight", dpi=300)
+        plt.close()
+        print(f"✅ Gráfico guardado en: {graph_path}")
+        return graph_path
+    except Exception as e:
+        print(f"❌ Error al guardar el gráfico: {str(e)}")
+        return None
+# Añadiendo los graficos
 
 
 graph_path_1 = generar_grafico_clasificacion()
 if graph_path_1 and os.path.exists(graph_path_1):
     pdf.image(graph_path_1.replace("\\", "/"), x=10, y=50, w=180)
 else:
-    print("❌ No se pudo agregar el gráfico de clasificación al PDF.")
+    print(" No se pudo agregar el gráfico de clasificación al PDF.")
 
 pdf.add_page()
 
@@ -883,6 +974,21 @@ if graph_path_6 and os.path.exists(graph_path_6):
 else:
     print("❌ No se pudo agregar el gráfico de gasto promedio al PDF.")
 
+pdf.add_page()
+
+graph_path_7 = generar_calendario_reservas()
+if graph_path_7 and os.path.exists(graph_path_7):
+    pdf.image(graph_path_7.replace("\\", "/"), x=10, y=30, w=180)
+else:
+    print("❌ No se pudo agregar el gráfico de gasto promedio al PDF.")
+
+pdf.add_page()
+
+graph_path_8 = generar_grafico_ingresos_por_ubicacion()
+if graph_path_8 and os.path.exists(graph_path_8):
+    pdf.image(graph_path_8.replace("\\", "/"), x=10, y=30, w=180)
+else:
+    print("❌ No se pudo agregar el gráfico de rentas por empresa al PDF.")
 
 # Referencias Bibliograficas
 pdf.add_page()
@@ -974,8 +1080,6 @@ pdf.ln(8)
 
 pdf.multi_cell(0, 8, txt="Universidad Pedagógica Experimental Libertador (2003): Manual de Trabajos de Grado Especialización y Maestría y Tesis Doctorales. Fedeupel. Caracas, Venezuela.", align="J")
 pdf.ln(8)
-
-# pdf.multi_cell(0,8, txt= "",align= "J" )
 
 
 def generar_pdf(output_path="Trabajo_final.pdf"):
