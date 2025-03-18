@@ -59,17 +59,6 @@ def configuraciones():
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # 📅 Filtros de Fecha
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            temp_filters["Pickupd"] = st.date_input("Periodo de Renta", value=st.session_state["filters"].get("Pickupd", []))
-        
-        with col2:
-            temp_filters["Returnd"] = st.date_input("Periodo de Retorno", value=st.session_state["filters"].get("Returnd", []))
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
         # Botones de Acción
         col1, col2 = st.columns(2)
         

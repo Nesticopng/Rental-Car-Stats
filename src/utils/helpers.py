@@ -81,16 +81,18 @@ def cargar_datos_sin_filtros():
     return df
 
 def cargar_datos():
-        # Aplicar Filtros si existen
+    # Aplicar Filtros si existen
     df = cargar_datos_sin_filtros()
 
     if "filters" in st.session_state:
         filters = st.session_state["filters"]
-
+        
         for key, value in filters.items():
+            column_name = key  # No hagas replace("_", "")
+            
             if isinstance(value, list) and value:  # Filtrar listas con valores seleccionados
-                df = df[df[key.replace("_", "")].isin(value)]
+                df = df[df[column_name].isin(value)]
             elif isinstance(value, tuple) and len(value) == 2:  # Rango de valores (min, max)
-                df = df[(df[key.replace("_", "")] >= value[0]) & (df[key.replace("_", "")] <= value[1])]
-
+                df = df[(df[column_name] >= value[0]) & (df[column_name] <= value[1])]
+    
     return df

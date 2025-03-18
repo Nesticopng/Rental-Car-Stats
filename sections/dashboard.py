@@ -9,8 +9,6 @@ from src.components.grafica_loc import grafica_loc
 from src.components.estado_registros import estado_registros
 from src.components.tasa_prepago import tasa_pregago
 
-df = cargar_datos()
-
 def inicio():
     st.title("Rent a Car Stats")
 
@@ -43,5 +41,7 @@ def inicio():
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 
     st.header("Base de Datos")
+
     configuraciones()
+    df = cargar_datos()
     st.dataframe(df)
