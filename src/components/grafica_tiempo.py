@@ -4,15 +4,6 @@ import calplot
 import numpy as np
 from src.utils.helpers import cargar_datos
 
-# Cargar Datos
-df = cargar_datos()
-
-# Convertir las fechas a formato datetime
-df["PickUpDate"] = pd.to_datetime(df["Pickupd"].astype(str).str[:10], errors="coerce")
-df["ReturnDate"] = pd.to_datetime(df["Returnd"].astype(str).str[:10], errors="coerce")
-df["BookedDate"] = pd.to_datetime(df["Booked"].astype(str).str[:10], errors="coerce")
-
-
 def mostrar_analisis(fecha_columna, titulo):
     with st.expander(f"Análisis Detallado", expanded=False):
         st.header(f"📊 Análisis de {titulo}")
@@ -102,6 +93,15 @@ def mostrar_calendario(fecha_columna, titulo):
 
 # Generar Gráfica
 def grafica_tiempo():
+
+    # Cargar Datos
+    df = cargar_datos()
+
+    # Convertir las fechas a formato datetime
+    df["PickUpDate"] = pd.to_datetime(df["Pickupd"].astype(str).str[:10], errors="coerce")
+    df["ReturnDate"] = pd.to_datetime(df["Returnd"].astype(str).str[:10], errors="coerce")
+    df["BookedDate"] = pd.to_datetime(df["Booked"].astype(str).str[:10], errors="coerce")
+
     st.header("📆 Calendario de Transacciones")
 
     tipo_fecha = st.selectbox(

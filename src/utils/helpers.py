@@ -6,8 +6,14 @@ from pyairports.airports import Airports
 
 def cargar_datos_sin_filtros():
 
-    # Cargar el archivo
-    df = pd.read_excel(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "BD.xlsx")))
+    # Cargar el archivo por defecto si no se ha subido uno, o utiliza el subido por el usuario
+    if "uploaded_file_path" in st.session_state:
+        file_path = st.session_state["uploaded_file_path"]
+    else:
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "BD.xlsx"))
+    
+    df = pd.read_excel(file_path)
+    
     columnas = df.columns.tolist()
 
     # Cargar decodificador (IATA)

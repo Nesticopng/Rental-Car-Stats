@@ -4,9 +4,6 @@ import numpy as np
 from src.utils.helpers import cargar_datos
 from src.utils.paleta_rojo import rojo
 
-# Cargar datos
-df = cargar_datos()
-
 # Análisis Automatizado
 def generar_analisis(data, metrica):
     st.write("### Análisis Estadístico")
@@ -75,6 +72,10 @@ def generar_analisis(data, metrica):
     st.write(data[columnas_a_mostrar])
 
 def grafica_loc():
+
+    # Cargar datos
+    df = cargar_datos()
+
     st.header("Análisis de Locaciones")
 
     # Filtros

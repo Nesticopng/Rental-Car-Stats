@@ -5,9 +5,15 @@ import os
 def guardar_archivo(uploadedfile):
     if not os.path.exists("temp"):
         os.makedirs("temp")
-    with open(os.path.join("temp", uploadedfile.name), "wb") as f:
+    file_path = os.path.join("temp", uploadedfile.name)
+    
+    with open(file_path, "wb") as f:
         f.write(uploadedfile.getbuffer())
-    return st.success(f"El Archivo se ha cargado :{uploadedfile.name} correctamente")
+
+    # Se guarda el Archivo en la session
+    st.session_state["uploaded_file_path"] = file_path
+
+    return st.success(f"El archivo {uploadedfile.name} se ha cargado correctamente.")
 
 def cargar_archivo():
     st.title("📤 Cargar Archivo")
@@ -18,7 +24,11 @@ def cargar_archivo():
             "tipo": archivo_excel.type,
             "tamaño": archivo_excel.size
         }
+       
         st.write(detalles_archivo)
+        
         df = pd.read_excel(archivo_excel)
+        
         st.dataframe(df)
+       
         guardar_archivo(archivo_excel)

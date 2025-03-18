@@ -2,30 +2,8 @@ import streamlit as st
 import plotly.express as px
 from src.utils.helpers import cargar_datos
 
-# Cargar Datos
-df = cargar_datos()
-
-# Categorizar los datos
-df["Pre_Deposito"] = df["res_prepagos"].apply(lambda x: "Hizo Pre-Depósito" if x > 0 else "No hizo Pre-Depósito")
-
-# Contar la frecuencia de cada categoría
-frecuencia_prepagos = df["Pre_Deposito"].value_counts().reset_index()
-frecuencia_prepagos.columns = ["Pre_Deposito", "Cantidad"]
-
-# Obtener totales
-total_registros = frecuencia_prepagos["Cantidad"].sum()
-hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "Hizo Pre-Depósito"]["Cantidad"].sum()
-no_hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "No hizo Pre-Depósito"]["Cantidad"].sum()
-
-# Calcular porcentajes
-porcentaje_hizo_pre = (hizo_pre / total_registros) * 100 if total_registros > 0 else 0
-porcentaje_no_hizo_pre = (no_hizo_pre / total_registros) * 100 if total_registros > 0 else 0
-
-# Calcular el promedio de dinero gastado en pre-depósitos
-promedio_predeposito = df[df["res_prepagos"] > 0]["res_prepagos"].mean()
-
 # Función para generar el análisis dinámico
-def generar_analisis_prepagos():
+def generar_analisis_prepagos(hizo_pre, no_hizo_pre, total_registros, porcentaje_hizo_pre, porcentaje_no_hizo_pre, promedio_predeposito):
     analisis = []
     
     if hizo_pre == total_registros:
@@ -51,6 +29,29 @@ def generar_analisis_prepagos():
 
 # Generar el gráfico pie
 def tasa_pregago():
+    
+    #Cargar Datos
+    df = cargar_datos()
+
+    # Categorizar los datos
+    df["Pre_Deposito"] = df["res_prepagos"].apply(lambda x: "Hizo Pre-Depósito" if x > 0 else "No hizo Pre-Depósito")
+
+    # Contar la frecuencia de cada categoría
+    frecuencia_prepagos = df["Pre_Deposito"].value_counts().reset_index()
+    frecuencia_prepagos.columns = ["Pre_Deposito", "Cantidad"]
+
+    # Obtener totales
+    total_registros = frecuencia_prepagos["Cantidad"].sum()
+    hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "Hizo Pre-Depósito"]["Cantidad"].sum()
+    no_hizo_pre = frecuencia_prepagos[frecuencia_prepagos["Pre_Deposito"] == "No hizo Pre-Depósito"]["Cantidad"].sum()
+
+    # Calcular porcentajes
+    porcentaje_hizo_pre = (hizo_pre / total_registros) * 100 if total_registros > 0 else 0
+    porcentaje_no_hizo_pre = (no_hizo_pre / total_registros) * 100 if total_registros > 0 else 0
+
+    # Calcular el promedio de dinero gastado en pre-depósitos
+    promedio_predeposito = df[df["res_prepagos"] > 0]["res_prepagos"].mean()
+
     st.header("Tasa de Porcentual de los Pre-Depósitos")
 
     col1, col2 = st.columns([2, 1])
@@ -85,5 +86,5 @@ def tasa_pregago():
                 st.header(f"**{total_registros:,} Registros**")
 
     with st.expander("Análisis detallado de los Pre-Depósitos"):
-        for linea in generar_analisis_prepagos():
+        for linea in generar_analisis_prepagos(hizo_pre, no_hizo_pre, total_registros, porcentaje_hizo_pre, porcentaje_no_hizo_pre, promedio_predeposito):
             st.write(linea)

@@ -52,7 +52,7 @@ def generar_grafico(df, columna, titulo, eje_x, metrica):
         text_col = "Gasto Promedio ($USD)"
         y_label = "Gasto Promedio ($USD)"
     else:
-        df["Promedio de Días Rentados"] = df["Promedio"].apply(lambda x: f"{x:.2f} días")
+        df["Promedio de Días Rentados"] = df["Promedio"].astype(int).apply(lambda x: f"{x} días")
         y_axis = "Promedio"
         text_col = "Promedio de Días Rentados"
         y_label = "Promedio de Días Rentados"
@@ -81,16 +81,18 @@ def mostrar_analisis(data, columna, nombre, metrica):
     max_valor = data.iloc[:, 1].max()
     min_valor = data.iloc[:, 1].min()
     top_categoria = data.iloc[0, 0]
+    min_categoria = data.iloc[0,-1]
     top_valor = data.iloc[0, 1]
-    
+    min_indice = data.iloc[:, -1].idxmin()
+    min_categoria = data.iloc[min_indice, 0]
+
     st.write(f"📊 **Total de registros analizados:** {total_registros:,}")
     st.write(f"📈 **Promedio de {metrica}:** {media:,.2f}")
     st.write(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
-    st.write(f"📉 **Desviación estándar:** {desviacion:,.2f}")
+    st.write(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
     if metrica == "Vehículos Rentados":
-        st.write(f"🔝 **Mayor {metrica}:** {top_categoria} con {top_valor:,}")
-        st.write(f"🔽 **Menor valor registrado:** {min_valor:,}")
-        st.write(f"🏆 **Mayor valor registrado:** {max_valor:,}")
+        st.write(f"🔽 **Los Vehículos menos demandados son:** {min_categoria} con {min_valor:,} resgistros")
+        st.write(f"🏆 **Los Vehículos más demandados son:** {top_categoria} con {max_valor:,} resgistros")
 
     else:
         st.write(f"🔝 **Mayor {metrica}:** {top_categoria} con {top_valor:,.2f}")

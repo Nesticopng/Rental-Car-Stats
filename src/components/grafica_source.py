@@ -4,9 +4,6 @@ import numpy as np
 from src.utils.helpers import cargar_datos
 from src.utils.paleta_rojo import rojo
 
-# Cargar Datos
-df = cargar_datos()
-
 # Mapeo de nombres de variables
 variable_mapping = {
     "Cantidad de Rentas": "Cantidad",
@@ -15,10 +12,6 @@ variable_mapping = {
     "Dinero Recaudado por Tarifa Total": "TotalBill",
     "Promedio de Días Rentados": "RDays"
 }
-
-# Contar la frecuencia de cada fuente de reserva
-frecuencia_source = df["Source"].value_counts().reset_index()
-frecuencia_source.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
 
 # Análisis Automatizado
 def mostrar_datos_y_analisis(data, es_dinero, es_promedio, metrica):
@@ -90,6 +83,14 @@ def mostrar_datos_y_analisis(data, es_dinero, es_promedio, metrica):
 
 # Generar Gráfico
 def grafica_source():
+    
+    # Cargar Datos
+    df = cargar_datos()
+    
+    # Contar la frecuencia de cada fuente de reserva
+    frecuencia_source = df["Source"].value_counts().reset_index()
+    frecuencia_source.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
+
     st.header("Análisis de Rentas y Recaudación por Empresa")
     
     metrica = st.selectbox(
