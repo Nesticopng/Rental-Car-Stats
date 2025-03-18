@@ -27,19 +27,41 @@ def mostrar_datos_y_analisis(data, es_dinero, es_promedio, metrica):
     min_valor = data.iloc[:, 1].min()
     top_empresa = data.iloc[0, 0]
     top_valor = data.iloc[0, 1]
+    top_categoria = data.iloc[0, 0]
+    min_indice = data.iloc[:, -1].idxmin()
+    min_categoria = data.iloc[min_indice, 0]
 
     # Calcular percentiles
     percentil_90 = np.percentile(data.iloc[:, 1], 90)
     percentil_10 = np.percentile(data.iloc[:, 1], 10)
 
     # Análisis General
-    analisis.append(f"📊 **Total de Empresas Analizadas:** {total_registros:,}")
-    analisis.append(f"📈 **Promedio de {metrica}:** {media:,.2f}")
-    analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
-    analisis.append(f"📉 **Desviación estándar:** {desviacion:,.2f}")
-    analisis.append(f"🔝 **Empresa con mayor {metrica}:** {top_empresa} con {top_valor:,.2f}")
-    analisis.append(f"🔽 **Menor {metrica} en el registro:** {min_valor:,.2f}")
-    analisis.append(f"🏆 **Mayor {metrica} en el registro:** {max_valor:,.2f}")
+
+    if metrica == "Cantidad de Rentas":
+        st.write(f"🏆 **Los Vehículos más demandados son:** {top_categoria} con {max_valor:,} resgistros")
+        st.write(f"🔽 **Los Vehículos menos demandados son:** {min_categoria} con {min_valor:,} resgistros")
+        analisis.append(f"📊 **Total de Empresas Analizadas:** {total_registros:,}")
+        analisis.append(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+        analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
+        analisis.append(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
+        analisis.append(f"🏆 **Empresa con mayor {metrica}:** {top_empresa} con {top_valor:,.0f}")
+        analisis.append(f"🔽 **Empresa con menor {metrica} en el registro:** {min_categoria} con {min_valor:,.0f}")
+
+    if es_dinero:
+        analisis.append(f"📊 **Total de Empresas Analizadas:** {total_registros:,}")
+        analisis.append(f"📈 **Promedio de {metrica}:** 💲{media:,.2f}")
+        analisis.append(f"📊 **Mediana de {metrica}:** 💲{mediana:,.2f}")
+        analisis.append(f"📉 **Desviación estándar de {metrica}:** 💲{desviacion:,.2f}")
+        analisis.append(f"🏆 **Empresa con mayor {metrica}:** {top_empresa} con 💲{top_valor:,.2f}")
+        analisis.append(f"🔽 **Empresa con menor {metrica} en el registro:** 💲{min_valor:,.2f}")
+
+    if es_promedio:
+        analisis.append(f"📊 **Total de Empresas Analizadas:** {total_registros:,}")
+        analisis.append(f"📈 **Promedio de {metrica}:** {media:,.0f}")
+        analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.0f}")
+        analisis.append(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
+        analisis.append(f"🏆 **Empresa con mayor {metrica}:** {top_empresa} con {top_valor:,.2f}")
+        analisis.append(f"🔽 **Empresa con menor {metrica} en el registro:** {min_valor:,.2f}")
 
     # Análisis de dispersión
     if desviacion > media * 0.5:
@@ -99,7 +121,7 @@ def grafica_source():
     )
 
     if metrica == "Cantidad de Rentas":
-        data = frecuencia_source
+        data = frecuencia_source.sort_values(by="Cantidad de Vehículos Rentados", ascending=False)
         es_dinero = False
         es_promedio = False
 
@@ -107,8 +129,9 @@ def grafica_source():
         columna_real = variable_mapping[metrica]
         data = df.groupby("Source")[columna_real].mean().reset_index()
         data.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
-        data["Cantidad de Vehículos Rentados"] = data["Cantidad de Vehículos Rentados"].round(2)
-        data["Promedio de Días Rentados"] = data["Cantidad de Vehículos Rentados"].apply(lambda x: f"{x:.2f} días")
+        data["Cantidad de Vehículos Rentados"] = data["Cantidad de Vehículos Rentados"].round(0)
+        data["Promedio de Días Rentados"] = data["Cantidad de Vehículos Rentados"].apply(lambda x: f"{x:.0f} días")
+        data = data.sort_values(by="Cantidad de Vehículos Rentados", ascending=False)
         es_dinero = False
         es_promedio = True
 
@@ -118,6 +141,7 @@ def grafica_source():
         data.columns = ["Empresa", "Cantidad de Vehículos Rentados"]
         data["Cantidad de Vehículos Rentados"] = data["Cantidad de Vehículos Rentados"].round(2)
         data["Dinero Recaudado ($USD)"] = data["Cantidad de Vehículos Rentados"].apply(lambda x: f"${x:,.2f}")
+        data = data.sort_values(by="Cantidad de Vehículos Rentados", ascending=False)
         es_dinero = True
         es_promedio = False
         

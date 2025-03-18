@@ -19,15 +19,25 @@ def generar_analisis(data, metrica):
     min_valor = data.iloc[:, 1].min()
     top_locacion = data.iloc[0, 0]
     top_valor = data.iloc[0, 1]
+    min_indice = data.iloc[:, -1].idxmin()
+    min_categoria = data.iloc[min_indice, 0]
 
-    analisis.append(f"📊 **Total de Ubicaciones analizadas:** {total_registros:,}")
-    analisis.append(f"📈 **Promedio de {metrica}:** {media:,.2f}")
-    analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
-    analisis.append(f"📉 **Desviación estándar:** {desviacion:,.2f}")
-    analisis.append(f"🔝 **Locación con mayor {metrica}:** {top_locacion} con {top_valor:,.2f}")
-    analisis.append(f"🔽 **Menor {metrica}:** {min_valor:,.2f}")
-    analisis.append(f"🏆 **Mayor {metrica}:** {max_valor:,.2f}")
+    if metrica == "Cantidad de Rentas":
+        analisis.append(f"📊 **Total de Ubicaciones analizadas:** {total_registros:,}")
+        analisis.append(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+        analisis.append(f"📊 **Mediana de {metrica}:** {mediana:,.0f}")
+        analisis.append(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
+        analisis.append(f"🏆 **Locación con mayor {metrica}:** {top_locacion} con {top_valor:,.0f}")
+        analisis.append(f"🔽 **La Ubicación que menos {metrica} generó fue {min_categoria} :** {min_valor:,.0f}")
     
+    if metrica == "Dinero Generado (USD)":
+        analisis.append(f"📊 **Total de Ubicaciones analizadas:** {total_registros:,}")
+        analisis.append(f"📈 **Promedio de {metrica}:** 💲{media:,.2f}")
+        analisis.append(f"📊 **Mediana de {metrica}:** 💲{mediana:,.2f}")
+        analisis.append(f"📉 **Desviación estándar de {metrica}:** 💲{desviacion:,.2f}")
+        analisis.append(f"🏆 **Locación con mayor {metrica}:** {top_locacion} con 💲{top_valor:,.2f}")
+        analisis.append(f"🔽 **Menor {metrica}:** 💲{min_valor:,.2f}")    
+
     # Análisis de dispersión
     if desviacion > media * 0.5:
         analisis.append(f"⚠️ **Alta variabilidad:** Existe una gran diferencia entre las locaciones en términos de {metrica}.")

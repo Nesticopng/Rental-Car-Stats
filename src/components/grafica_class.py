@@ -86,25 +86,37 @@ def mostrar_analisis(data, columna, nombre, metrica):
     min_indice = data.iloc[:, -1].idxmin()
     min_categoria = data.iloc[min_indice, 0]
 
-    st.write(f"📊 **Total de registros analizados:** {total_registros:,}")
-    st.write(f"📈 **Promedio de {metrica}:** {media:,.2f}")
-    st.write(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
-    st.write(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
     if metrica == "Vehículos Rentados":
-        st.write(f"🔽 **Los Vehículos menos demandados son:** {min_categoria} con {min_valor:,} resgistros")
+        st.write(f"📊 **Total de categorías de Vehículos analizados:** {total_registros:,}")
+        st.write(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+        st.write(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
+        st.write(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
         st.write(f"🏆 **Los Vehículos más demandados son:** {top_categoria} con {max_valor:,} resgistros")
+        st.write(f"🔽 **Los Vehículos menos demandados son:** {min_categoria} con {min_valor:,} resgistros")
+
+    if metrica == "Gasto Promedio ($USD)":
+        st.write(f"📊 **Total de categorías de Vehículos analizados:** {total_registros:,}")
+        st.write(f"📈 **Promedio de {metrica}:** 💲{media:,.2f}")
+        st.write(f"📊 **Mediana de {metrica}:** 💲{mediana:,.2f}")
+        st.write(f"📉 **Desviación estándar de {metrica}:** 💲{desviacion:,.2f}")
+        st.write(f"🏆 **Mayor {metrica}:** {top_categoria} con 💲{top_valor:,.2f}")
+        st.write(f"🔽 **Menor {metrica}:** {min_categoria} con 💲{min_valor:,.2f}")
 
     else:
-        st.write(f"🔝 **Mayor {metrica}:** {top_categoria} con {top_valor:,.2f}")
-        st.write(f"🔽 **Menor valor registrado:** {min_valor:,.2f}")
-        st.write(f"🏆 **Mayor valor registrado:** {max_valor:,.2f}")
-        
+        st.write(f"📊 **Total de categorías de Vehículos analizados:** {total_registros:,}")
+        st.write(f"📈 **Promedio de {metrica}:** {media:,.2f}")
+        st.write(f"📊 **Mediana de {metrica}:** {mediana:,.2f}")
+        st.write(f"📉 **Desviación estándar de {metrica}:** {desviacion:,.2f}")
+        st.write(f"🏆 **Mayor {metrica}:** {top_categoria} con {top_valor:,.2f}")
+        st.write(f"🔽 **Menor {metrica}::** {min_categoria} con {min_valor:,.2f}")
+    
+    
     # Interpretaciones
     if desviacion > media * 0.5:
-        st.write("⚠️ **Alta variabilidad:** Existen grandes diferencias entre categorías en esta métrica.")
+        st.write(f"⚠️ **Alta variabilidad:** Existen grandes diferencias de {metrica} entre los vehículos.")
 
     else:
-        st.write("✅ **Distribución estable:** No hay grandes diferencias extremas en la métrica analizada.")
+        st.write(f"✅ **Distribución estable:** No hay grandes diferencias extremas en {metrica} analizada.")
     
     if max_valor > media * 1.5:
         st.write(f"🚀 **{top_categoria} tiene valores significativamente superiores a la media.**")
@@ -163,11 +175,14 @@ def grafica_vehiculos():
         datos_analisis = df.groupby(grafica_config)[variable_seleccionada].mean().round(2).reset_index()
         datos_analisis.columns = [grafica_config, "Promedio"]
         variable_seleccionada_es = gasto_mapping_es[variable_seleccionada]
+        datos_analisis = datos_analisis.sort_values(by="Promedio", ascending=False).reset_index(drop=True)
+
         
     else:
         datos_analisis = df.groupby(grafica_config)["RDays"].mean().round(2).reset_index()
         datos_analisis.columns = [grafica_config, "Promedio"]
-    
+        datos_analisis = datos_analisis.sort_values(by="Promedio", ascending=False).reset_index(drop=True)
+
     # Título Dinámico
     titulo = (f"Análisis de {metrica} de {variable_seleccionada_es} según {grafica_config_es} "
           if metrica == "Gasto Promedio ($USD)"

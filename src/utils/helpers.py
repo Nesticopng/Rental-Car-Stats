@@ -87,14 +87,13 @@ def cargar_datos_sin_filtros():
 
 def cargar_datos():
     # Aplicar Filtros si existen
-    # Aplicar Filtros si existen
     df = cargar_datos_sin_filtros()
 
     if "filters" in st.session_state:
         filters = st.session_state["filters"]
         
         for key, value in filters.items():
-            column_name = key  # No hagas replace("_", "")
+            column_name = key
             
             if isinstance(value, list) and value:  # Filtrar listas con valores seleccionados
                 df = df[df[column_name].isin(value)]
