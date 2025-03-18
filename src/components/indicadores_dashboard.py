@@ -34,7 +34,7 @@ def indicadores_dashboard():
         with col1:
             st.subheader("Dinero Recaudado", divider="gray")
             st.title(f"**${suma_total_show_formateado}**")
-            st.write(f"El total de dinero recaudado es **{suma_total_show_formateado} $** en un periodo de un año.")
+            st.write(f"El total de dinero recaudado es **{suma_total_show_formateado} $**.")
         
         with col2:
             st.subheader("Destino más Recurrido", divider="gray")
